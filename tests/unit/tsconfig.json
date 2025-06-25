@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "../../packages/tsconfig/base.json",
+  "compilerOptions": {
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "baseUrl": "../..",
+    "paths": {
+      "@extension/*": ["packages/*"]
+    },
+    "allowImportingTsExtensions": false,
+    "noEmit": true,
+    "types": ["node", "mocha"]
+  },
+  "include": ["./**/*.ts", "../../packages/shared/lib/**/*.ts"],
+  "ts-node": {
+    "compilerOptions": {
+      "module": "CommonJS"
+    }
+  }
+}

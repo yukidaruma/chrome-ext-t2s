@@ -1,23 +1,10 @@
-const logger = {
-  log(...message: unknown[]) {
-    console.log('[CEB]', ...message);
-  },
-  debug(...message: unknown[]) {
-    console.debug('[CEB]', ...message);
-  },
-};
+import { logger, formatText, extractFieldValues, speakText } from '@extension/shared/lib/utils/text-to-speech';
+import type { FieldExtractor } from '@extension/shared/lib/utils/text-to-speech';
 
 logger.log('All content script loaded');
 
 // TODO: Replace with values from user preferences
 const GLOBAL_VOICE_URI: string | null = 'Google 日本語';
-
-type FieldExtractor = {
-  name: string;
-  selector: string;
-  attribute?: string;
-  defaultValue?: string;
-};
 
 type DetectUpdateByAttribute = {
   type: 'attribute';
@@ -53,55 +40,6 @@ const siteConfigs: SiteConfig[] = [
     textFormat: '%(author) %(message)',
   },
 ];
-
-const speakText = async (text: string, voiceURI: string | null): Promise<void> =>
-  new Promise(resolve => {
-    const voices = speechSynthesis.getVoices();
-    const utterance = new SpeechSynthesisUtterance(text);
-
-    if (voiceURI) {
-      const voice = voices.find(v => v.voiceURI === voiceURI);
-      if (voice) {
-        utterance.voice = voice;
-      }
-    }
-
-    utterance.onend = () => {
-      resolve();
-    };
-
-    speechSynthesis.speak(utterance);
-  });
-
-const formatText = (format: string, fields: Record<string, string>): string =>
-  format.replace(/%\((\w+)\)/g, (_match, fieldName) => fields[fieldName]);
-
-const extractFieldValues = (element: Element, fields: FieldExtractor[]): Record<string, string> => {
-  const result: Record<string, string> = {};
-
-  for (const field of fields) {
-    let value: string | null = null;
-
-    if (field.selector) {
-      const targetElement = element.querySelector(field.selector);
-      if (targetElement) {
-        if (field.attribute) {
-          value = targetElement.getAttribute(field.attribute);
-        } else if (targetElement.textContent) {
-          value = targetElement.textContent.trim();
-        }
-      }
-    }
-
-    const resolvedValue = value ?? field.defaultValue;
-    if (resolvedValue === undefined) {
-      logger.debug(`Field: '${field.name}' was not found`);
-    }
-    result[field.name] = (resolvedValue ?? '').trim();
-  }
-
-  return result;
-};
 
 const createMonitor = (config: SiteConfig) => () => {
   logger.debug(`${config.name} monitoring started.`);

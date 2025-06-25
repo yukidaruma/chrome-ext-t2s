@@ -63,6 +63,7 @@ export default config(
         },
       ],
       'arrow-body-style': ['error', 'as-needed'],
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/consistent-type-imports': 'error',
       '@typescript-eslint/consistent-type-exports': 'error',
       'import-x/order': [
@@ -100,6 +101,14 @@ export default config(
     files: ['**/packages/shared/**/*.ts'],
     rules: {
       'no-restricted-imports': 'off',
+    },
+  },
+  {
+    files: ['**/tests/**/*.ts', '**/*.test.ts', '**/*.spec.ts'],
+    rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-unused-vars': 'off',
+      'func-style': 'off',
     },
   },
 );
