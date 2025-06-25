@@ -7,51 +7,36 @@
   "tasks": {
     "ready": {
       "dependsOn": ["^ready"],
-      "outputs": ["../../dist/**", "dist/**"],
-      "cache": false
+      "outputs": ["../../dist/**", "dist/**"]
     },
     "dev": {
       "dependsOn": ["ready"],
       "outputs": ["../../dist/**", "dist/**"],
-      "cache": false,
+
       "persistent": true
     },
     "build": {
       "dependsOn": ["ready", "^build"],
-      "outputs": ["../../dist/**", "dist/**"],
-      "cache": false
+      "outputs": ["../../dist/**", "dist/**"]
     },
-    "e2e": {
-      "cache": false
-    },
-    "type-check": {
-      "cache": false
-    },
-    "lint": {
-      "cache": false
-    },
-    "lint:fix": {
-      "cache": false
-    },
+    "e2e": {},
+    "type-check": {},
+    "lint": {},
+    "lint:fix": {},
     "format": {
-      "dependsOn": ["^format"],
-      "cache": false
+      "dependsOn": ["^format"]
     },
     "clean:node_modules": {
-      "dependsOn": ["^clean:node_modules"],
-      "cache": false
+      "dependsOn": ["^clean:node_modules"]
     },
     "clean:turbo": {
-      "dependsOn": ["^clean:turbo"],
-      "cache": false
+      "dependsOn": ["^clean:turbo"]
     },
     "clean:bundle": {
-      "dependsOn": ["^clean:bundle"],
-      "cache": false
+      "dependsOn": ["^clean:bundle"]
     },
     "clean": {
-      "dependsOn": ["^clean"],
-      "cache": false
+      "dependsOn": ["^clean"]
     }
   }
 }
