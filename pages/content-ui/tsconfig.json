@@ -7,5 +7,6 @@
     },
     "types": ["chrome", "node", "./tailwind.d.ts"]
   },
+  "references": [{ "path": "../../packages/ui" }],
   "include": ["src", "tailwind.config.ts", "build.mts"]
 }

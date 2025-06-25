@@ -7,5 +7,6 @@
     },
     "types": ["chrome", "node"]
   },
+  "references": [{ "path": "../../packages/ui" }],
   "include": ["src", "vite.config.mts", "tailwind.config.ts"]
 }

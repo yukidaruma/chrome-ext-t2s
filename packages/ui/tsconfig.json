@@ -7,7 +7,8 @@
       "@/*": ["./*"]
     },
     "noEmit": false,
-    "declaration": true
+    "declaration": true,
+    "composite": true
   },
   "include": ["index.ts", "lib", "tailwind.config.ts"]
 }

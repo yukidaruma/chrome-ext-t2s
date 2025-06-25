@@ -8,5 +8,6 @@
     "types": ["chrome", "node", "./tailwind.d.ts"],
     "allowImportingTsExtensions": true
   },
+  "references": [{ "path": "../../packages/ui" }],
   "include": ["src", "build.mts", "tailwind.config.ts"]
 }
