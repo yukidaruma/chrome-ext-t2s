@@ -1,0 +1,278 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>chrome-ext-t2s test screen</title>
+    <style>
+      h2 {
+        margin: 0.5em 0;
+      }
+
+      /* Chat message styles */
+      yt-live-chat-text-message-renderer {
+        display: block;
+        line-height: 1.4;
+      }
+      yt-live-chat-text-message-renderer.auto-message {
+        background-color: #f0f8ff;
+      }
+      #author-name {
+        margin-right: 0.25em;
+      }
+
+      /* Mode toggle styles */
+      .mode-toggle {
+        display: inline-block;
+        text-align: center;
+        width: 4em;
+        cursor: pointer;
+        text-decoration: underline;
+      }
+      .mode-toggle.manual {
+        color: blue;
+      }
+      .mode-toggle.auto {
+        color: green;
+      }
+      #auto-controls {
+        margin-top: 0.5em;
+        visibility: hidden;
+      }
+
+      /* Auto mode overrides */
+      body[data-auto-mode='true'] .mode-toggle.manual {
+        display: none;
+      }
+      body[data-auto-mode='false'] .mode-toggle.auto {
+        display: none;
+      }
+      body[data-auto-mode='true'] #auto-controls {
+        visibility: visible;
+      }
+    </style>
+  </head>
+  <body data-auto-mode="false">
+    <h1>chrome-ext-t2s test screen</h1>
+    <p>Enable the extension to test the chat text-to-speech functionality.</p>
+
+    <section style="user-select: none">
+      <h2>Chat Controls</h2>
+      <div id="mode-indicator" style="margin-bottom: 0.5em">
+        <strong><u>M</u>ode:</strong>
+        <span class="mode-toggle manual" onclick="toggleMode(true)">Manual</span>
+        <span class="mode-toggle auto" onclick="toggleMode(false)">Auto</span>
+      </div>
+      <div id="manual-controls">
+        <input type="text" id="authorInput" value="User" placeholder="name" style="width: 6em" />
+        <input type="text" id="messageInput" placeholder="message" />
+        <button onclick="addManualMessage()">Add Message</button>
+        <button onclick="addRandomMessage()"><u>A</u>dd Random Message</button>
+        <button onclick="clearMessages()"><u>C</u>lear Logs</button>
+      </div>
+      <div id="auto-controls">
+        <label>Auto post interval:</label>
+        <select id="intervalSelect" onchange="updateInterval()">
+          <option value="1000">1s</option>
+          <option value="5000" selected>5s</option>
+          <option value="10000">10s</option>
+        </select>
+      </div>
+    </section>
+
+    <section>
+      <h2>Chat Logs</h2>
+      <div id="chat-container" style="border: 1px solid #333; height: 25em; overflow-y: auto; padding: 0.5em"></div>
+    </section>
+
+    <section>
+      <h2>Hints</h2>
+      <ul>
+        <li>You can start in auto mode by adding <code>#auto</code> to the URL</li>
+      </ul>
+    </section>
+
+    <script>
+      const MAX_MESSAGE_COUNT = 20;
+
+      let messageCounter = 0;
+      /** @type {number | null} Timer ID for automatic message posting */
+      let autoPostTimer = null;
+
+      // Simulated user messages
+      const randomMessages = [
+        'Hello',
+        'Hi',
+        'Well played',
+        'こんにちは',
+        'ありがとう',
+        'おつかれさまでした',
+        'ナイス！',
+      ];
+      const randomAuthors = ['Donut', 'Choco', 'タルト', 'クレープ'];
+
+      function addMessage({ author, message, isAuto = false }) {
+        if (!author || !message.trim()) {
+          return;
+        }
+
+        messageCounter++;
+
+        // Mimic YouTube live chat structure
+        const messageElement = document.createElement('yt-live-chat-text-message-renderer');
+        messageElement.setAttribute('id', messageCounter);
+        if (isAuto) {
+          messageElement.classList.add('auto-message');
+        }
+        messageElement.innerHTML =
+          `<yt-live-chat-author-chip id="author-name" style="font-weight: bold; color: #1976d2;">${author}</yt-live-chat-author-chip>` +
+          `<yt-formatted-string id="message">${message}</yt-formatted-string>`;
+
+        // Add new message to bottom
+        const container = document.getElementById('chat-container');
+        container.appendChild(messageElement);
+
+        // Remove old messages if count exceeds limit
+        const messages = container.querySelectorAll('yt-live-chat-text-message-renderer');
+        if (messages.length > MAX_MESSAGE_COUNT) {
+          const deleteCount = messages.length - MAX_MESSAGE_COUNT;
+          for (let i = 0; i < deleteCount; i++) {
+            messages[i].remove();
+          }
+        }
+
+        // Auto scroll
+        container.scrollTop = container.scrollHeight;
+
+        console.log('Message added:', author, message);
+      }
+
+      function addManualMessage() {
+        const authorName = document.getElementById('authorInput').value;
+        const messageText = document.getElementById('messageInput').value;
+
+        if (!messageText.trim()) {
+          return;
+        }
+
+        addMessage({ author: authorName, message: messageText, isAuto: false });
+      }
+
+      function addRandomMessage() {
+        const randomAuthor = randomAuthors[Math.floor(Math.random() * randomAuthors.length)];
+        const randomMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+        addMessage({ author: randomAuthor, message: randomMessage, isAuto: true });
+      }
+
+      function clearMessages() {
+        document.getElementById('chat-container').innerHTML = '';
+        messageCounter = 0;
+      }
+
+      function isAutoMode() {
+        return location.hash === '#auto';
+      }
+
+      function updateModeDisplay() {
+        isAuto = isAutoMode();
+        document.body.setAttribute('data-auto-mode', isAuto.toString());
+
+        if (isAuto) {
+          startAutoMode();
+        } else {
+          stopAutoMode();
+        }
+      }
+
+      function startAutoMode() {
+        const intervalMs = parseInt(document.getElementById('intervalSelect').value);
+        autoPostTimer = setInterval(() => {
+          addRandomMessage();
+        }, intervalMs);
+      }
+
+      function stopAutoMode() {
+        if (autoPostTimer) {
+          clearInterval(autoPostTimer);
+          autoPostTimer = null;
+        }
+      }
+
+      function toggleAutoMode() {
+        if (autoPostTimer) {
+          stopAutoMode();
+        } else {
+          startAutoMode();
+        }
+      }
+
+      function updateInterval() {
+        if (autoPostTimer) {
+          clearInterval(autoPostTimer);
+        }
+        startAutoMode();
+      }
+
+      function toggleMode(toAuto) {
+        location.hash = toAuto ? '#auto' : '';
+      }
+
+      // Listen for hash changes
+      window.addEventListener('hashchange', updateModeDisplay);
+
+      // Global keyboard shortcuts
+      document.addEventListener('keydown', function (e) {
+        if (e.altKey) {
+          e.preventDefault();
+          switch (e.key) {
+            case 'a':
+              addRandomMessage();
+              break;
+            case 'm':
+              toggleMode(!isAutoMode());
+              break;
+            case 'c':
+              clearMessages();
+              break;
+          }
+        }
+      });
+
+      // Auto-focus input on keypress when no element is focused
+      document.addEventListener('keypress', function (e) {
+        const activeElement = document.activeElement;
+        const isInputFocused =
+          activeElement &&
+          (activeElement.tagName === 'INPUT' ||
+            activeElement.tagName === 'TEXTAREA' ||
+            activeElement.tagName === 'SELECT');
+
+        if (!isInputFocused) {
+          const messageInput = document.getElementById('messageInput');
+          if (messageInput) {
+            messageInput.focus();
+          }
+        }
+      });
+
+      // Enter key to send message (always available)
+      window.addEventListener('load', function () {
+        const messageInput = document.getElementById('messageInput');
+        if (messageInput) {
+          messageInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+              addManualMessage();
+            }
+          });
+        }
+      });
+
+      // Initialize on page load
+      window.onload = function () {
+        updateModeDisplay();
+        addMessage({ author: 'System', message: 'Chat test page loaded', isAuto: true });
+        addMessage({ author: randomAuthors.at(-1), message: 'こんにちは', isAuto: true });
+      };
+    </script>
+  </body>
+</html>
