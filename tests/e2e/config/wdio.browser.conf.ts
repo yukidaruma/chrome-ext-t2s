@@ -19,6 +19,7 @@ const chromeCapabilities = {
       '--disable-gpu',
       '--no-sandbox',
       '--disable-dev-shm-usage',
+      '--remote-debugging-port=9223',
       ...(IS_CI ? ['--headless'] : []),
     ],
     prefs: { 'extensions.ui.developer_mode': true },

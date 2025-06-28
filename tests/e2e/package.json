@@ -14,11 +14,14 @@
   "devDependencies": {
     "@extension/env": "workspace:*",
     "@extension/tsconfig": "workspace:*",
+    "@types/chrome-remote-interface": "^0.31.13",
     "@wdio/cli": "^9.14.0",
     "@wdio/globals": "^9.14.0",
     "@wdio/local-runner": "^9.14.0",
     "@wdio/mocha-framework": "^9.14.0",
     "@wdio/spec-reporter": "^9.14.0",
-    "@wdio/types": "^9.14.0"
+    "@wdio/types": "^9.14.0",
+    "chrome-remote-interface": "^0.33.2",
+    "playwright": "^1.53.1"
   }
 }
