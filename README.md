@@ -141,10 +141,6 @@ the build speed and development experience by using Vite and Turborepo.
 `module-name` - You can find it inside each `package.json` under the key `name`, e.g. `@extension/content-script`, you
 can use only `content-script` without `@extension/` prefix
 
-## How do I disable modules I'm not using?
-
-[Read here](packages/module-manager/README.md)
-
 ## Environment variables
 
 Read: [Env Documentation](packages/env/README.md)
@@ -171,7 +167,6 @@ The extension lives in the `chrome-extension` directory and includes the followi
 Code that is transpiled to be part of the extension lives in the [pages](pages) directory.
 
 - [`content`](pages/content) - Scripts injected into specified pages (You can see it in console)
-- [`content-ui`](pages/content-ui) - React Components injected into specified pages (You can see it at the very bottom of pages)
 - [`content-runtime`](pages/content-runtime/src/) - [injected content scripts](https://developer.chrome.com/docs/extensions/develop/concepts/content-scripts#functionality)
   This can be injected from e.g. `popup` like standard `content`
 - [`devtools`](pages/devtools/) - [extend the browser DevTools](https://developer.chrome.com/docs/extensions/how-to/devtools/extend-devtools#creating)
@@ -207,7 +202,6 @@ Other useful packages:
 
 - `zipper` - run `pnpm zip` to pack the `dist` folder into `extension-YYYYMMDD-HHmmss.zip` inside the newly created
   `dist-zip`
-- `module-manager` - run `pnpm module-manager` to enable/disable modules
 - `e2e` - run `pnpm e2e` for end-to-end tests of your zipped extension on different browsers
 
 ## Troubleshooting

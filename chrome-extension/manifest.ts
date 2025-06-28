@@ -50,10 +50,6 @@ const manifest = {
       js: ['content/all.iife.js'],
       all_frames: true,
     },
-    {
-      matches: ['http://*/*', 'https://*/*', '<all_urls>'],
-      css: ['content.css'],
-    },
   ],
   web_accessible_resources: [
     {
