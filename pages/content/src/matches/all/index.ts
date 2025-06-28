@@ -44,10 +44,17 @@ const siteConfigs: SiteConfig[] = [
 const createMonitor = (config: SiteConfig) => () => {
   logger.debug(`${config.name} monitoring started.`);
 
+  // Start observing updates
+  let containerNode!: Element | null;
+  if (config.containerSelector) {
+    containerNode = document.querySelector(config.containerSelector);
+  }
+  containerNode ??= document.body;
+
   let lastMessageId: string | null = null;
   switch (config.detectUpdateBy?.type) {
     case 'attribute': {
-      const lastElement = document.querySelector(`${config.messageSelector}:last-of-type`);
+      const lastElement = containerNode.querySelector(`${config.messageSelector}:last-of-type`);
       lastMessageId = lastElement?.getAttribute(config.detectUpdateBy.attribute) ?? null;
     }
   }
@@ -75,8 +82,8 @@ const createMonitor = (config: SiteConfig) => () => {
     };
   };
 
-  const scanExistingMessages = (): void => {
-    document.querySelectorAll(config.messageSelector).forEach(element => {
+  const scanExistingMessages = (container: Element): void => {
+    container.querySelectorAll(config.messageSelector).forEach(element => {
       const messageData = extractMessageData(element);
       if (messageData?.id) {
         lastMessageId = messageData.id;
@@ -84,11 +91,11 @@ const createMonitor = (config: SiteConfig) => () => {
     });
   };
 
-  const findNewMessages = (): Array<{ id: string | null; text: string }> => {
+  const findNewMessages = (container: Element): Array<{ id: string | null; text: string }> => {
     let foundPreviousLastMessage = !lastMessageId;
     const newMessages: Array<{ id: string | null; text: string }> = [];
 
-    document.querySelectorAll(config.messageSelector).forEach(element => {
+    container.querySelectorAll(config.messageSelector).forEach(element => {
       let elementId: string | null = null;
       switch (config.detectUpdateBy?.type) {
         case 'attribute':
@@ -129,7 +136,7 @@ const createMonitor = (config: SiteConfig) => () => {
   };
 
   // Initial scan for existing messages to set lastMessageId (does not speak them)
-  scanExistingMessages();
+  scanExistingMessages(containerNode);
 
   // Set up MutationObserver to watch for new messages
   const observer = new MutationObserver(mutations => {
@@ -143,10 +150,10 @@ const createMonitor = (config: SiteConfig) => () => {
         const node = mutation.addedNodes.item(i)!;
         if (node.nodeType === Node.ELEMENT_NODE) {
           const element = node as Element;
-          if (element.matches(config.messageSelector) ?? element.querySelector(config.messageSelector)) {
+          if (element.matches(config.messageSelector)) {
             logger.debug('DOM changes detected, processing new messages');
 
-            const newMessages = findNewMessages();
+            const newMessages = findNewMessages(containerNode);
             queueMessages(newMessages);
             break checkMutations;
           }
@@ -155,18 +162,11 @@ const createMonitor = (config: SiteConfig) => () => {
     }
   });
 
-  // Start observing updates
-  let targetNode!: Element | null;
-  if (config.containerSelector) {
-    targetNode = document.querySelector(config.containerSelector);
-  }
-  targetNode ??= document.body;
-
-  observer.observe(targetNode, {
+  observer.observe(containerNode, {
     childList: true,
     subtree: !config.containerSelector, // Only observe subtree if no specific container
   });
-  logger.debug('MutationObserver started', { targetNode });
+  logger.debug('MutationObserver started', { containerNode });
 };
 
 const main = () => {
