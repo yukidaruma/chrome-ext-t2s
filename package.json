@@ -1,5 +1,5 @@
 {
-  "name": "chrome-extension-boilerplate-react-vite",
+  "name": "chrome-ext-t2s",
   "version": "0.5.0",
   "description": "chrome extension boilerplate",
   "license": "MIT",
@@ -7,7 +7,7 @@
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite.git"
+    "url": "https://github.com/yukidaruma/chrome-ext-t2s.git"
   },
   "type": "module",
   "scripts": {
