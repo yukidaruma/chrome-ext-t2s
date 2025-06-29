@@ -49,6 +49,22 @@ export interface ThemeStateType {
   isLight: boolean;
 }
 
-export type ThemeStorageType = BaseStorageType<ThemeStateType> & {
+export type ToggleStorageType<T> = BaseStorageType<T> & {
   toggle: () => Promise<void>;
+};
+
+export type ThemeStorageType = ToggleStorageType<ThemeStateType>;
+
+export interface ExtensionEnabledStateType {
+  enabled: boolean;
+}
+
+export type ExtensionEnabledStorageType = ToggleStorageType<ExtensionEnabledStateType>;
+
+export type LanguageStateType = {
+  language: string; // must be `SupportedLanguagesKeysType`
+};
+
+export type LanguageStorageType = BaseStorageType<LanguageStateType> & {
+  setLanguage: (language: string) => Promise<void>;
 };

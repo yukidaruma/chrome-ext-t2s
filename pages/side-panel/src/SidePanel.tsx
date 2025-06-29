@@ -1,26 +1,54 @@
 import '@src/SidePanel.css';
-import { t } from '@extension/i18n';
-import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
+import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
 import { exampleThemeStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
+import { useEffect, useState } from 'react';
 
 const SidePanel = () => {
   const { isLight } = useStorage(exampleThemeStorage);
-  const logo = isLight ? 'side-panel/logo_vertical.svg' : 'side-panel/logo_vertical_dark.svg';
+  const [storageData, setStorageData] = useState<Record<string, unknown>>({});
 
-  const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
+  useEffect(() => {
+    const getAllStorage = async () => {
+      const data = await chrome.storage.local.get();
+      setStorageData(data);
+    };
+
+    getAllStorage();
+
+    // Listen for storage changes
+    const handleStorageChange = (changes: { [key: string]: chrome.storage.StorageChange }) => {
+      setStorageData(prev => {
+        const updated = { ...prev };
+        Object.entries(changes).forEach(([key, { newValue }]) => {
+          if (newValue !== undefined) {
+            updated[key] = newValue;
+          } else {
+            delete updated[key];
+          }
+        });
+        return updated;
+      });
+    };
+
+    chrome.storage.onChanged.addListener(handleStorageChange);
+    return () => chrome.storage.onChanged.removeListener(handleStorageChange);
+  }, []);
 
   return (
-    <div className={cn('App', isLight ? 'bg-slate-50' : 'bg-gray-800')}>
-      <header className={cn('App-header', isLight ? 'text-gray-900' : 'text-gray-100')}>
-        <button onClick={goGithubSite}>
-          <img src={chrome.runtime.getURL(logo)} className="App-logo" alt="logo" />
-        </button>
-        <p>
-          Edit <code>pages/side-panel/src/SidePanel.tsx</code>
-        </p>
-        <ToggleButton onClick={exampleThemeStorage.toggle}>{t('toggleTheme')}</ToggleButton>
-      </header>
+    <div className={cn('App', isLight ? 'light' : 'dark')}>
+      <ToggleButton
+        checked={isLight}
+        onChange={exampleThemeStorage.toggle}
+        label={isLight ? 'Light Mode' : 'Dark Mode'}
+      />
+
+      <div className="mt-4">
+        <h3 className="mb-2 text-sm font-semibold">Storage Debug:</h3>
+        <pre className="bg-secondary text-secondary max-h-64 overflow-auto rounded p-4 text-left text-xs">
+          {JSON.stringify(storageData, null, 2)}
+        </pre>
+      </div>
     </div>
   );
 };

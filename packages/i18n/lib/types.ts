@@ -10,3 +10,8 @@ export type I18nValueType = {
 
 export type MessageKeyType = keyof typeof enMessage;
 export type LocalesJSONType = typeof enMessage;
+
+export const supportedLanguages: Record<SupportedLanguagesKeysType, string> = {
+  en: 'English',
+  ja: '日本語',
+};

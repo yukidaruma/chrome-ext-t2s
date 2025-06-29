@@ -1,4 +1,5 @@
 import { logger, formatText, extractFieldValues, speakText } from '@extension/shared/lib/utils/text-to-speech';
+import { extensionEnabledStorage } from '@extension/storage';
 import type { FieldExtractor } from '@extension/shared/lib/utils/text-to-speech';
 
 logger.log('All content script loaded');
@@ -127,6 +128,12 @@ const createMonitor = (config: SiteConfig) => () => {
   };
 
   const queueMessages = async (messages: Array<{ id: string | null; text: string }>) => {
+    const { enabled } = await extensionEnabledStorage.get();
+    if (!enabled) {
+      logger.debug('Extension is disabled, skipping speech');
+      return;
+    }
+
     for (const message of messages) {
       logger.log('Speaking new message', message);
 

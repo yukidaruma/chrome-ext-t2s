@@ -5,27 +5,49 @@
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "Chrome extension boilerplate"
+    "message": "chrome-ext-t2s"
   },
   "toggleTheme": {
     "message": "Toggle theme"
   },
-  "injectButton": {
-    "message": "Click to inject Content Scripts"
+  "toggleExtension": {
+    "message": "Toggle extension"
   },
-  "greeting": {
-    "description": "Greeting message",
-    "message": "Hello, My name is $NAME$",
-    "placeholders": {
-      "name": {
-        "content": "$1",
-        "example": "John Doe"
-      }
-    }
+  "contacts": {
+    "message": "Contacts"
   },
-  "hello": {
-    "description": "Placeholder example",
-    "message": "Hello $1"
+  "enabled": {
+    "message": "Enabled"
+  },
+  "disabled": {
+    "message": "Disabled"
+  },
+  "openPage": {
+    "message": "Open $1"
+  },
+  "settings": {
+    "message": "Settings"
+  },
+  "githubRepository": {
+    "message": "GitHub repository"
+  },
+  "xProfile": {
+    "message": "X profile"
+  },
+  "settingsTitle": {
+    "message": "Settings"
+  },
+  "theme": {
+    "message": "Theme"
+  },
+  "language": {
+    "message": "Language"
+  },
+  "lightMode": {
+    "message": "Light Mode"
+  },
+  "darkMode": {
+    "message": "Dark Mode"
   },
   "displayErrorInfo": {
     "message": "Error occur"

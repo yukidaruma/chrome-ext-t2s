@@ -1,0 +1,67 @@
+{
+  "extensionDescription": {
+    "description": "Extension description",
+    "message": "React、TypeScript、Viteを使用したChrome拡張機能のボイラープレートです。"
+  },
+  "extensionName": {
+    "description": "Extension name",
+    "message": "chrome-ext-t2s"
+  },
+  "toggleTheme": {
+    "message": "テーマ切り替え"
+  },
+  "toggleExtension": {
+    "message": "拡張機能のオン・オフ"
+  },
+  "contacts": {
+    "message": "連絡先"
+  },
+  "enabled": {
+    "message": "オン"
+  },
+  "disabled": {
+    "message": "オフ"
+  },
+  "openPage": {
+    "message": "$1を開く"
+  },
+  "settings": {
+    "message": "設定"
+  },
+  "githubRepository": {
+    "message": "GitHubリポジトリ"
+  },
+  "xProfile": {
+    "message": "Xプロフィール"
+  },
+  "settingsTitle": {
+    "message": "設定"
+  },
+  "theme": {
+    "message": "テーマ"
+  },
+  "language": {
+    "message": "言語"
+  },
+  "lightMode": {
+    "message": "ライトモード"
+  },
+  "darkMode": {
+    "message": "ダークモード"
+  },
+  "displayErrorInfo": {
+    "message": "エラーが発生しました"
+  },
+  "displayErrorDescription": {
+    "message": "ページの読み込み中に問題が発生しました。"
+  },
+  "displayErrorDetailsInfo": {
+    "message": "エラー詳細:"
+  },
+  "displayErrorUnknownErrorInfo": {
+    "message": "不明なエラー"
+  },
+  "displayErrorReset": {
+    "message": "再度実行する"
+  }
+}

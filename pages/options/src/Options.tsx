@@ -1,24 +1,46 @@
 import '@src/Options.css';
 import { t } from '@extension/i18n';
-import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage } from '@extension/storage';
+import { supportedLanguages } from '@extension/i18n/lib/types';
+import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
+import { exampleThemeStorage, languageStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 
 const Options = () => {
   const { isLight } = useStorage(exampleThemeStorage);
-  const logo = isLight ? 'options/logo_horizontal.svg' : 'options/logo_horizontal_dark.svg';
+  const { language } = useStorage(languageStorage);
 
-  const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
+  const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    languageStorage.setLanguage(event.target.value);
+  };
 
   return (
-    <div className={cn('App', isLight ? 'bg-slate-50 text-gray-900' : 'bg-gray-800 text-gray-100')}>
-      <button onClick={goGithubSite}>
-        <img src={chrome.runtime.getURL(logo)} className="App-logo" alt="logo" />
-      </button>
-      <p>
-        Edit <code>pages/options/src/Options.tsx</code>
-      </p>
-      <ToggleButton onClick={exampleThemeStorage.toggle}>{t('toggleTheme')}</ToggleButton>
+    <div className={cn('App p-6', isLight ? 'light' : 'dark')}>
+      <h1 className="mb-6 text-2xl font-bold">{t('settingsTitle')}</h1>
+
+      <div className="space-y-6">
+        <div>
+          <h2 className="mb-2 text-lg font-semibold">{t('theme')}</h2>
+          <ToggleButton
+            checked={isLight}
+            onChange={exampleThemeStorage.toggle}
+            label={isLight ? t('lightMode') : t('darkMode')}
+          />
+        </div>
+
+        <div className="hidden">
+          <h2 className="mb-2 font-semibold">{t('language')}</h2>
+          <select
+            value={language}
+            onChange={handleLanguageChange}
+            className="text-secondary bg-secondary border-primary rounded border px-3 py-2">
+            {Object.entries(supportedLanguages).map(([key, label]) => (
+              <option key={key} value={key}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
     </div>
   );
 };
