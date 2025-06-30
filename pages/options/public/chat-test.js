@@ -2,7 +2,7 @@
 
 // Load the content script in test page in options
 // eslint-disable-next-line import-x/no-unresolved
-if (!navigator.webdriver) import('/content/all.iife.js');
+import('/content/all.iife.js');
 
 const MAX_MESSAGE_COUNT = 20;
 

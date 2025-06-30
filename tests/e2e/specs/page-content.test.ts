@@ -1,8 +1,4 @@
 import CDP from 'chrome-remote-interface';
-import { readFileSync } from 'fs';
-import { createServer } from 'http';
-import path from 'path';
-import type { AddressInfo } from 'net';
 
 declare global {
   interface Window {
@@ -13,59 +9,29 @@ declare global {
 const TTS_SCRIPTS_LOADED_LOG = '[TTS] All content script loaded';
 
 describe('Text-to-Speech Extension E2E', () => {
-  let server!: ReturnType<typeof createServer>;
-  let serverUrl: string;
   let cdpClient: CDP.Client = null!;
 
   // Incremental URL counter to clear browser cache
+  let extensionPath: string = null!;
   let testUrlCounter = 0;
   const getTestUrl = (): string => {
     testUrlCounter += 1;
-    return `${serverUrl}/chat-test.html?${testUrlCounter}`;
+    return `${extensionPath}/options/chat-test.html?${testUrlCounter}`;
   };
 
   before(async () => {
-    // Start HTTP server to serve the chat-test.html file
-    const testFilePath = path.resolve(process.cwd(), '../../pages/options/public/chat-test.html');
-    const htmlContent = readFileSync(testFilePath, 'utf-8');
-    const jsFilePath = path.resolve(process.cwd(), '../../pages/options/public/chat-test.js');
-    const jsContent = readFileSync(jsFilePath, 'utf-8');
-
-    server = createServer((req, res) => {
-      if (req.url?.startsWith('/chat-test.html') || req.url === '/') {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        res.end(htmlContent);
-      } else if (req.url?.startsWith('/chat-test.js')) {
-        res.writeHead(200, { 'Content-Type': 'application/javascript' });
-        res.end(jsContent);
-      } else {
-        res.writeHead(404);
-        res.end('Not Found');
-      }
-    });
-
-    // Find an available port
-    const port = await new Promise<number>(resolve => {
-      server.listen(0, () => {
-        resolve((server.address() as AddressInfo).port);
-      });
-    });
-
-    serverUrl = `http://localhost:${port}`;
-    console.log(`Test server started at ${serverUrl}`);
-
     // Set up basic CDP connection (target will be determined per test)
     try {
       cdpClient = await CDP({ port: 9223 });
     } catch (error) {
       console.warn('CDP monitoring not available:', (error as Error).message);
     }
+
+    // Get the path to the extension (chrome-extension://)
+    extensionPath = await browser.getExtensionPath();
   });
 
   after(async () => {
-    if (server) {
-      await new Promise<void>(resolve => server.close(() => resolve()));
-    }
     if (cdpClient) {
       await cdpClient.close();
     }
