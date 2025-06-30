@@ -24,6 +24,23 @@ const processLogQueue = async () => {
   isProcessing = false;
 };
 
+const writeToConsole = (level: LogEntry['level'], ...args: unknown[]) => {
+  switch (level) {
+    case 'error':
+      console.error('[TTS]', ...args);
+      break;
+    case 'warn':
+      console.warn('[TTS]', ...args);
+      break;
+    case 'info':
+      console.log('[TTS]', ...args);
+      break;
+    case 'debug':
+      console.debug('[TTS]', ...args);
+      break;
+  }
+};
+
 const processLogTask = async ({ level, args, timestamp }: LogTask) => {
   const text = formatMessage(...args);
 
@@ -31,22 +48,11 @@ const processLogTask = async ({ level, args, timestamp }: LogTask) => {
     await Promise.allSettled([
       logStorage.addEntry(level, text, undefined, timestamp),
       logConsoleStorage.get().then(({ enabled }) => {
-        if (enabled) {
-          switch (level) {
-            case 'error':
-              console.error('[T2S]', ...args);
-              break;
-            case 'warn':
-              console.warn('[T2S]', ...args);
-              break;
-            case 'info':
-              console.log('[T2S]', ...args);
-              break;
-            case 'debug':
-              console.debug('[T2S]', ...args);
-              break;
-          }
+        if (!enabled) {
+          return;
         }
+
+        writeToConsole(level, text);
       }),
     ]);
   } catch {
@@ -55,6 +61,11 @@ const processLogTask = async ({ level, args, timestamp }: LogTask) => {
 };
 
 const logMessage = (level: 'debug' | 'info' | 'warn' | 'error', ...args: unknown[]) => {
+  if (navigator.webdriver) {
+    writeToConsole(level, ...args);
+    return;
+  }
+
   logQueue.push({ level, args, timestamp: Date.now() });
   processLogQueue();
 };

@@ -26,13 +26,18 @@ describe('Text-to-Speech Extension E2E', () => {
 
   before(async () => {
     // Start HTTP server to serve the chat-test.html file
-    const testFilePath = path.resolve(process.cwd(), '../../chat-test.html');
+    const testFilePath = path.resolve(process.cwd(), '../../pages/options/public/chat-test.html');
     const htmlContent = readFileSync(testFilePath, 'utf-8');
+    const jsFilePath = path.resolve(process.cwd(), '../../pages/options/public/chat-test.js');
+    const jsContent = readFileSync(jsFilePath, 'utf-8');
 
     server = createServer((req, res) => {
       if (req.url?.startsWith('/chat-test.html') || req.url === '/') {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         res.end(htmlContent);
+      } else if (req.url?.startsWith('/chat-test.js')) {
+        res.writeHead(200, { 'Content-Type': 'application/javascript' });
+        res.end(jsContent);
       } else {
         res.writeHead(404);
         res.end('Not Found');
@@ -105,7 +110,7 @@ describe('Text-to-Speech Extension E2E', () => {
     });
 
     // waitUntil serves as an implicit assertion; the test will fail on timeout.
-    await browser.waitUntil(() => logs.some(log => log?.includes('[TTS] Speaking new message')));
+    await browser.waitUntil(() => logs.some(log => log?.includes('[TTS] Added new message to speech queue:')));
   });
 
   it('should process multiple messages sequentially and spy on speakText calls using CDP', async () => {

@@ -28,6 +28,9 @@
   "settings": {
     "message": "Settings"
   },
+  "testPage": {
+    "message": "Test Page"
+  },
   "githubRepository": {
     "message": "GitHub repository"
   },

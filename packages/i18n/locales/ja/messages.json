@@ -28,6 +28,9 @@
   "settings": {
     "message": "設定"
   },
+  "testPage": {
+    "message": "テスト用画面"
+  },
   "githubRepository": {
     "message": "GitHubリポジトリ"
   },

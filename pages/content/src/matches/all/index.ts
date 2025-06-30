@@ -177,7 +177,13 @@ const createMonitor = (config: SiteConfig) => () => {
 const main = () => {
   const url = location.href;
 
-  const siteConfig = siteConfigs.find(config => config.urlPattern.test(url));
+  let siteConfig = siteConfigs.find(config => config.urlPattern.test(url));
+
+  // Use YouTube config for test screen
+  if (location.protocol === 'chrome-extension:' && location.href.includes('/chat-test.html')) {
+    siteConfig = siteConfigs[0];
+  }
+
   logger.debug(`Running content script on URL: ${url}`, { enabled: Boolean(siteConfig) });
   if (!siteConfig) {
     return;

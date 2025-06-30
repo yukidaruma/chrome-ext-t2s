@@ -40,6 +40,13 @@ const Options = () => {
             ))}
           </select>
         </div>
+
+        <div>
+          <h2 className="mb-2 text-lg font-semibold">Development</h2>
+          <a href="chat-test.html" target="_blank">
+            {t('openPage', t('testPage'))}
+          </a>
+        </div>
       </div>
     </div>
   );
