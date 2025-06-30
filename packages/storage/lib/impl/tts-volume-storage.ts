@@ -14,7 +14,7 @@ const storage = createStorage<TtsVolumeStateType>(
 
 export const ttsVolumeStorage: TtsVolumeStorageType = {
   ...storage,
-  setVolume: async (volume: number) => {
+  setVolume: async volume => {
     // Clamp volume between 0.0 and 1.0
     const clampedVolume = Math.max(0.0, Math.min(1.0, volume));
     await storage.set({ volume: clampedVolume });

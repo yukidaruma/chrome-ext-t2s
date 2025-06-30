@@ -14,7 +14,7 @@ const storage = createStorage<LanguageStateType>(
 
 export const languageStorage: LanguageStorageType = {
   ...storage,
-  setLanguage: async (language: string) => {
+  setLanguage: async language => {
     await storage.set({ language });
   },
 };

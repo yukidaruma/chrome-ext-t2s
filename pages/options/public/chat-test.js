@@ -11,7 +11,16 @@ let messageCounter = 0;
 let autoPostTimer = null;
 
 // Simulated user messages
-const randomMessages = ['Hello', 'Hi', 'Well played', 'こんにちは', 'ありがとう', 'おつかれさまでした', 'ナイス！'];
+const randomMessages = [
+  'Hello',
+  'Hi',
+  'Well played',
+  'こんにちは',
+  'ありがとう',
+  'おつかれさまでした',
+  'ナイス！',
+  '😄',
+];
 const randomAuthors = ['Donut', 'Choco', 'タルト', 'クレープ'];
 
 function addMessage({ author, message, isAuto = false }) {

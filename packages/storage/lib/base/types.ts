@@ -104,3 +104,37 @@ export type TtsVolumeStateType = {
 export type TtsVolumeStorageType = BaseStorageType<TtsVolumeStateType> & {
   setVolume: (volume: number) => Promise<void>;
 };
+
+// text-filter-storage.ts
+export type BaseTextFilter = {
+  id: number;
+  enabled: boolean;
+  target: 'field' | 'output'; // フィールド個別 or 最終出力
+  fieldName?: string; // target が 'field' の場合に使用
+  description?: string;
+};
+export type PatternFilter = BaseTextFilter & {
+  type: 'pattern';
+  isRegex?: boolean;
+  flags?: string;
+  pattern: string;
+  replacement: string;
+};
+export type CommandFilter = BaseTextFilter & {
+  type: 'command';
+  isRegex?: never;
+  flags?: never;
+  pattern: string;
+  replacement?: never;
+};
+
+export type TextFilter = PatternFilter | CommandFilter;
+export type TextFilterStateType = {
+  filters: TextFilter[];
+  nextId: number;
+};
+export type TextFilterStorageType = BaseStorageType<TextFilterStateType> & {
+  addFilter: (filterData: Omit<TextFilter, 'id'>) => Promise<TextFilter>;
+  removeFilter: (id: number) => Promise<void>;
+  updateFilter: (id: number, updates: Partial<Omit<TextFilter, 'id'>>) => Promise<void>;
+};

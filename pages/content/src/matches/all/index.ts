@@ -1,5 +1,6 @@
-import { logger, formatText, extractFieldValues, speakText } from '@extension/shared/lib/utils';
-import { extensionEnabledStorage } from '@extension/storage';
+import { logger, formatText, extractFieldValues, speakText, normalizeWhitespaces } from '@extension/shared/lib/utils';
+import { applyTextFilters } from '@extension/shared/lib/utils/text-filter';
+import { extensionEnabledStorage, textFilterStorage } from '@extension/storage';
 import type { FieldExtractor } from '@extension/shared/lib/utils/text-to-speech';
 
 logger.log('All content script loaded');
@@ -45,6 +46,15 @@ const siteConfigs: SiteConfig[] = [
 const createMonitor = (config: SiteConfig) => () => {
   logger.debug(`${config.name} monitoring started.`);
 
+  // Subscribe to filter changes
+  let cachedFilters = textFilterStorage.getSnapshot()?.filters ?? [];
+
+  const _unsubscribeFilterUpdate = textFilterStorage.subscribe(() => {
+    const newFilters = textFilterStorage.getSnapshot()?.filters ?? [];
+    cachedFilters = newFilters;
+    logger.debug(`Text filters updated: ${newFilters.length} filters`);
+  });
+
   // Start observing updates
   let containerNode!: Element | null;
   if (config.containerSelector) {
@@ -76,10 +86,26 @@ const createMonitor = (config: SiteConfig) => () => {
     const hasContent = Object.values(fieldValues).some(value => value !== '');
     if (!hasContent) return null;
 
-    const formattedText = formatText(config.textFormat, fieldValues);
+    // Apply field-level filters
+    const filteredFieldValues = { ...fieldValues };
+
+    for (const [fieldName, fieldValue] of Object.entries(filteredFieldValues)) {
+      const fieldFilters = cachedFilters.filter(f => f.enabled && f.target === 'field' && f.fieldName === fieldName);
+      filteredFieldValues[fieldName] = applyTextFilters(fieldValue, fieldFilters, { field: fieldName, logger });
+    }
+
+    let formattedText = formatText(config.textFormat, filteredFieldValues);
+
+    // Apply output-level filters
+    const outputFilters = cachedFilters.filter(f => f.enabled && f.target === 'output');
+    formattedText = applyTextFilters(formattedText, outputFilters, { logger });
+
     return {
       id: elementId,
-      text: formattedText,
+      // Re-normalize whitespace. formattedText may contain extra spacing from:
+      // - formatText: user-supplied format string with multiple spaces
+      // - applyTextFilters: text replacements
+      text: normalizeWhitespaces(formattedText),
     };
   };
 

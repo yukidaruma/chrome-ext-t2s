@@ -1,5 +1,5 @@
 import { createStorage, StorageEnum } from '../base/index.js';
-import type { JSDataType, LogEntry, LogStateType, LogStorageType } from '../base/index.js';
+import type { LogEntry, LogStateType, LogStorageType } from '../base/index.js';
 
 const storage = createStorage<LogStateType>(
   'log-storage-key',
@@ -15,7 +15,7 @@ const storage = createStorage<LogStateType>(
 
 export const logStorage: LogStorageType = {
   ...storage,
-  addEntry: async (level: LogEntry['level'], message: string, data?: JSDataType, timestamp = Date.now()) => {
+  addEntry: async (level, message, data?, timestamp = Date.now()) => {
     const newEntry: LogEntry = {
       timestamp: timestamp,
       level,
