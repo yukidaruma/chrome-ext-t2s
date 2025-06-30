@@ -1,4 +1,4 @@
-import { logger, formatText, extractFieldValues, speakText } from '@extension/shared/lib/utils/text-to-speech';
+import { logger, formatText, extractFieldValues, speakText } from '@extension/shared/lib/utils';
 import { extensionEnabledStorage } from '@extension/storage';
 import type { FieldExtractor } from '@extension/shared/lib/utils/text-to-speech';
 
@@ -135,7 +135,7 @@ const createMonitor = (config: SiteConfig) => () => {
     }
 
     for (const message of messages) {
-      logger.log('Speaking new message', message);
+      logger.debug(`Added new message to speech queue: ${message.text}`);
 
       const resolvedVoiceURI = config.voiceURI ?? GLOBAL_VOICE_URI;
       await speakText(message.text, resolvedVoiceURI);
@@ -158,8 +158,6 @@ const createMonitor = (config: SiteConfig) => () => {
         if (node.nodeType === Node.ELEMENT_NODE) {
           const element = node as Element;
           if (element.matches(config.messageSelector)) {
-            logger.debug('DOM changes detected, processing new messages');
-
             const newMessages = findNewMessages(containerNode);
             queueMessages(newMessages);
             break checkMutations;
@@ -178,11 +176,10 @@ const createMonitor = (config: SiteConfig) => () => {
 
 const main = () => {
   const url = location.href;
-  logger.debug(`Running content script on URL: ${url}`);
 
   const siteConfig = siteConfigs.find(config => config.urlPattern.test(url));
+  logger.debug(`Running content script on URL: ${url}`, { enabled: Boolean(siteConfig) });
   if (!siteConfig) {
-    logger.debug('No matching site configuration found, skipping execution.');
     return;
   }
 

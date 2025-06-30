@@ -1,11 +1,4 @@
-export const logger = {
-  log(...message: unknown[]) {
-    console.log('[TTS]', ...message);
-  },
-  debug(...message: unknown[]) {
-    console.debug('[TTS]', ...message);
-  },
-};
+import { logger } from './logger.js';
 
 export const formatText = (format: string, fields: Record<string, string>): string =>
   format.replace(/%\((\w+)\)/g, (_match, fieldName) => fields[fieldName]);
@@ -53,10 +46,13 @@ export const speakText = async (text: string, voiceURI: string | null): Promise<
       const voice = voices.find(v => v.voiceURI === voiceURI);
       if (voice) {
         utterance.voice = voice;
+      } else {
+        logger.warn(`voice: ${voiceURI} not found`);
       }
     }
 
     utterance.onend = () => {
+      logger.debug(`speech end: ${text}`);
       resolve();
     };
 

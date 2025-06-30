@@ -1,3 +1,4 @@
+/* eslint-disable import-x/exports-last */
 import type { StorageEnum } from './index.js';
 
 export type ValueOrUpdateType<D> = D | ((prev: D) => Promise<D> | D);
@@ -44,27 +45,54 @@ export type StorageConfigType<D = string> = {
   };
 };
 
-export interface ThemeStateType {
-  theme: 'light' | 'dark';
-  isLight: boolean;
-}
-
-export type ToggleStorageType<T> = BaseStorageType<T> & {
-  toggle: () => Promise<void>;
-};
-
-export type ThemeStorageType = ToggleStorageType<ThemeStateType>;
-
-export interface ExtensionEnabledStateType {
+// extension-enabled-storage.ts
+export type ExtensionEnabledStateType = {
   enabled: boolean;
-}
-
+};
 export type ExtensionEnabledStorageType = ToggleStorageType<ExtensionEnabledStateType>;
 
+// language-storage.ts
 export type LanguageStateType = {
   language: string; // must be `SupportedLanguagesKeysType`
 };
-
 export type LanguageStorageType = BaseStorageType<LanguageStateType> & {
   setLanguage: (language: string) => Promise<void>;
 };
+
+// log-console-storage.ts
+export type LogConsoleStateType = {
+  enabled: boolean;
+};
+export type LogConsoleStorageType = ToggleStorageType<LogConsoleStateType>;
+
+// log-storage.ts
+export type JSDataType = string | number | JSDataObject | Array<JSDataType>;
+type JSDataObject = {
+  [key: string]: JSDataType;
+};
+export type LogEntry = {
+  timestamp: number;
+  level: 'debug' | 'info' | 'warn' | 'error';
+  message: string;
+  data?: JSDataType;
+};
+export type LogStateType = {
+  entries: LogEntry[];
+  maxEntries: number;
+};
+
+export type LogStorageType = BaseStorageType<LogStateType> & {
+  addEntry: (level: LogEntry['level'], message: string, data?: JSDataType, timestamp?: number) => Promise<void>;
+  clearLogs: () => Promise<void>;
+  getRecentLogs: (count?: number) => Promise<LogEntry[]>;
+};
+
+// theme-storage.ts
+export type ThemeStateType = {
+  theme: 'light' | 'dark';
+  isLight: boolean;
+};
+export type ToggleStorageType<T> = BaseStorageType<T> & {
+  toggle: () => Promise<void>;
+};
+export type ThemeStorageType = ToggleStorageType<ThemeStateType>;
