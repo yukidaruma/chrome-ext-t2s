@@ -96,3 +96,11 @@ export type ToggleStorageType<T> = BaseStorageType<T> & {
   toggle: () => Promise<void>;
 };
 export type ThemeStorageType = ToggleStorageType<ThemeStateType>;
+
+// tts-volume-storage.ts
+export type TtsVolumeStateType = {
+  volume: number; // 0.0 to 1.0
+};
+export type TtsVolumeStorageType = BaseStorageType<TtsVolumeStateType> & {
+  setVolume: (volume: number) => Promise<void>;
+};

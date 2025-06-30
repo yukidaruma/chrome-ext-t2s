@@ -31,6 +31,9 @@
   "testPage": {
     "message": "Test Page"
   },
+  "voiceVolume": {
+    "message": "Voice Volume"
+  },
   "githubRepository": {
     "message": "GitHub repository"
   },

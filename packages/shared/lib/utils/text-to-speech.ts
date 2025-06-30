@@ -1,4 +1,5 @@
 import { logger } from './logger.js';
+import { ttsVolumeStorage } from '@extension/storage';
 
 export const formatText = (format: string, fields: Record<string, string>): string =>
   format.replace(/%\((\w+)\)/g, (_match, fieldName) => fields[fieldName]);
@@ -37,20 +38,24 @@ export const extractFieldValues = (element: Element, fields: FieldExtractor[]): 
   return result;
 };
 
-export const speakText = async (text: string, voiceURI: string | null): Promise<void> =>
-  new Promise(resolve => {
-    const voices = speechSynthesis.getVoices();
-    const utterance = new SpeechSynthesisUtterance(text);
+export const speakText = async (text: string, voiceURI: string | null): Promise<void> => {
+  const voices = speechSynthesis.getVoices();
+  const utterance = new SpeechSynthesisUtterance(text);
 
-    if (voiceURI) {
-      const voice = voices.find(v => v.voiceURI === voiceURI);
-      if (voice) {
-        utterance.voice = voice;
-      } else {
-        logger.warn(`voice: ${voiceURI} not found`);
-      }
+  // Apply volume setting
+  const { volume } = await ttsVolumeStorage.get();
+  utterance.volume = volume;
+
+  if (voiceURI) {
+    const voice = voices.find(v => v.voiceURI === voiceURI);
+    if (voice) {
+      utterance.voice = voice;
+    } else {
+      logger.warn(`voice: ${voiceURI} not found`);
     }
+  }
 
+  return new Promise(resolve => {
     utterance.onend = () => {
       logger.debug(`speech end: ${text}`);
       resolve();
@@ -58,3 +63,4 @@ export const speakText = async (text: string, voiceURI: string | null): Promise<
 
     speechSynthesis.speak(utterance);
   });
+};

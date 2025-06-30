@@ -167,7 +167,7 @@ const SidePanel = () => {
             filteredLogs.map((log, index) => (
               <div key={index} className="mb-1 font-mono">
                 <span className="text-secondary">{formatTimestamp(log.timestamp)}</span>{' '}
-                <span className={levelColors[log.level]}>[{log.level.toUpperCase()}]</span>{' '}
+                <span className={cn('inline-block w-12', levelColors[log.level])}>[{log.level.toUpperCase()}]</span>{' '}
                 <span className="text-primary">{log.message}</span>
                 {log.data && (
                   <div className="text-secondary ml-4 text-xs">

@@ -70,3 +70,11 @@ code {
 .border-secondary {
   border-color: var(--border-secondary);
 }
+
+a {
+  color: theme('colors.blue.600');
+  text-decoration: underline;
+}
+.App.dark a {
+  color: theme('colors.blue.400');
+}

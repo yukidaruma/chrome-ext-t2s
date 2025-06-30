@@ -31,6 +31,9 @@
   "testPage": {
     "message": "テスト用画面"
   },
+  "voiceVolume": {
+    "message": "音量"
+  },
   "githubRepository": {
     "message": "GitHubリポジトリ"
   },
