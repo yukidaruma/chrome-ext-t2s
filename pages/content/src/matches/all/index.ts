@@ -138,7 +138,7 @@ const createMonitor = (config: SiteConfig) => () => {
       logger.debug(`Added new message to speech queue: ${message.text}`);
 
       const resolvedVoiceURI = config.voiceURI ?? GLOBAL_VOICE_URI;
-      await speakText(message.text, resolvedVoiceURI);
+      await speakText(message.text, resolvedVoiceURI, logger);
     }
   };
 

@@ -1,40 +1,13 @@
-import { formatText, extractFieldValues } from '../../packages/shared/lib/utils/text-to-speech.ts';
+import {
+  extractFieldValues,
+  formatText,
+  normalizeWhitespaces,
+} from '../../packages/shared/lib/utils/text-to-speech.ts';
 import { describe, it } from 'mocha';
 import { strict as assert } from 'assert';
 import type { FieldExtractor } from '../../packages/shared/lib/utils/text-to-speech.ts';
 
 describe('Text-to-Speech Utility Functions', () => {
-  describe('formatText', () => {
-    it('should replace single field placeholder', () => {
-      const result = formatText('Hello, %(name)!', { name: 'Donut' });
-      assert.equal(result, 'Hello, Donut!');
-    });
-
-    it('should replace multiple field placeholders', () => {
-      const result = formatText('%(author): %(message)', {
-        author: 'Donut',
-        message: 'Hello there',
-      });
-      assert.equal(result, 'Donut: Hello there');
-    });
-
-    // Note: This should not happen in a real application
-    it('should replace missing fields with undefined', () => {
-      const result = formatText('%(author): %(message)', { author: 'Donut' });
-      assert.equal(result, 'Donut: undefined');
-    });
-
-    it('should handle empty format string', () => {
-      const result = formatText('', { author: 'Donut' });
-      assert.equal(result, '');
-    });
-
-    it('should return text unchanged when no placeholders are used', () => {
-      const result = formatText('Plain text', { author: 'Donut' });
-      assert.equal(result, 'Plain text');
-    });
-  });
-
   describe('extractFieldValues', () => {
     it('should extract text content from mock elements', () => {
       const mockElement = {
@@ -119,6 +92,61 @@ describe('Text-to-Speech Utility Functions', () => {
 
       const result = extractFieldValues(mockElement, fields);
       assert.deepEqual(result, { author: 'Donut', message: 'Great stream!' });
+    });
+  });
+
+  describe('formatText', () => {
+    it('should replace single field placeholder', () => {
+      const result = formatText('Hello, %(name)!', { name: 'Donut' });
+      assert.equal(result, 'Hello, Donut!');
+    });
+
+    it('should replace multiple field placeholders', () => {
+      const result = formatText('%(author): %(message)', {
+        author: 'Donut',
+        message: 'Hello there',
+      });
+      assert.equal(result, 'Donut: Hello there');
+    });
+
+    // Note: This should not happen in a real application
+    it('should replace missing fields with undefined', () => {
+      const result = formatText('%(author): %(message)', { author: 'Donut' });
+      assert.equal(result, 'Donut: undefined');
+    });
+
+    it('should handle empty format string', () => {
+      const result = formatText('', { author: 'Donut' });
+      assert.equal(result, '');
+    });
+
+    it('should return text unchanged when no placeholders are used', () => {
+      const result = formatText('Plain text', { author: 'Donut' });
+      assert.equal(result, 'Plain text');
+    });
+  });
+
+  describe('normalizeWhitespaces', () => {
+    it('should normalize all types of whitespace to single spaces', () => {
+      assert.equal(normalizeWhitespaces('Hello     world'), 'Hello world');
+      assert.equal(normalizeWhitespaces('Hello\t\t\tworld'), 'Hello world');
+      assert.equal(normalizeWhitespaces('Hello\n\nworld'), 'Hello world');
+      assert.equal(normalizeWhitespaces('Hello\n\t  \n world'), 'Hello world');
+      assert.equal(normalizeWhitespaces('Hello　　world'), 'Hello world'); // Fullwidth space
+    });
+
+    it('should trim leading and trailing whitespace', () => {
+      assert.equal(normalizeWhitespaces('  \t\n Hello world \n\t  '), 'Hello world');
+    });
+
+    it('should return normal text as is', () => {
+      assert.equal(normalizeWhitespaces(''), ''); // Empty string
+      assert.equal(normalizeWhitespaces('Hello world'), 'Hello world'); // Normal text
+    });
+
+    it('should handle real chat message with whitespaces', () => {
+      const result = normalizeWhitespaces('Donut:\n\n    Great　stream!\n');
+      assert.equal(result, 'Donut: Great stream!');
     });
   });
 });

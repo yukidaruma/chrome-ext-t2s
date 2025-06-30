@@ -1,8 +1,5 @@
-import { logger } from './logger.js';
 import { ttsVolumeStorage } from '@extension/storage';
-
-export const formatText = (format: string, fields: Record<string, string>): string =>
-  format.replace(/%\((\w+)\)/g, (_match, fieldName) => fields[fieldName]);
+import type { logger as loggerType } from './logger.js';
 
 export type FieldExtractor = {
   name: string;
@@ -10,7 +7,6 @@ export type FieldExtractor = {
   attribute?: string;
   defaultValue?: string;
 };
-
 export const extractFieldValues = (element: Element, fields: FieldExtractor[]): Record<string, string> => {
   const result: Record<string, string> = {};
 
@@ -29,16 +25,18 @@ export const extractFieldValues = (element: Element, fields: FieldExtractor[]): 
     }
 
     const resolvedValue = value ?? field.defaultValue;
-    if (resolvedValue === undefined) {
-      logger.debug(`Field: '${field.name}' was not found`);
-    }
-    result[field.name] = (resolvedValue ?? '').trim();
+    result[field.name] = normalizeWhitespaces(resolvedValue ?? '');
   }
 
   return result;
 };
 
-export const speakText = async (text: string, voiceURI: string | null): Promise<void> => {
+export const formatText = (format: string, fields: Record<string, string>): string =>
+  format.replace(/%\((\w+)\)/g, (_match, fieldName) => fields[fieldName]);
+
+export const normalizeWhitespaces = (text: string): string => text.replace(/\s+/g, ' ').trim();
+
+export const speakText = async (text: string, voiceURI: string | null, logger?: typeof loggerType): Promise<void> => {
   const voices = speechSynthesis.getVoices();
   const utterance = new SpeechSynthesisUtterance(text);
 
@@ -51,13 +49,13 @@ export const speakText = async (text: string, voiceURI: string | null): Promise<
     if (voice) {
       utterance.voice = voice;
     } else {
-      logger.warn(`voice: ${voiceURI} not found`);
+      logger?.warn(`voice: ${voiceURI} not found`);
     }
   }
 
   return new Promise(resolve => {
     utterance.onend = () => {
-      logger.debug(`speech end: ${text}`);
+      logger?.debug(`speech end: ${text}`);
       resolve();
     };
 
