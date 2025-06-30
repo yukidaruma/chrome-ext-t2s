@@ -296,17 +296,17 @@ describe('Text Filter Functions', () => {
             id: 1,
             enabled: true,
             target: 'field',
-            fieldName: 'author',
+            fieldName: 'name',
             type: 'pattern',
             pattern: 'User',
             replacement: 'ユーザー',
           },
         ];
 
-        const result1 = applyTextFilters('User123', filters, { field: 'author' });
+        const result1 = applyTextFilters('User123', filters, { fieldName: 'name' });
         assert.equal(result1, 'ユーザー123');
 
-        const result2 = applyTextFilters('User123', filters, { field: 'message' });
+        const result2 = applyTextFilters('User123', filters, { fieldName: 'body' });
         assert.equal(result2, 'User123'); // Should not apply to different field
 
         const result3 = applyTextFilters('User123', filters);
@@ -319,7 +319,7 @@ describe('Text Filter Functions', () => {
             id: 1,
             enabled: true,
             target: 'field',
-            fieldName: 'message',
+            fieldName: 'body',
             type: 'pattern',
             pattern: 'filter',
             replacement: '',
@@ -328,7 +328,7 @@ describe('Text Filter Functions', () => {
             id: 2,
             enabled: true,
             target: 'field',
-            fieldName: 'message',
+            fieldName: 'body',
             type: 'command',
             pattern: 'substring(0, 8)',
           },
@@ -346,7 +346,7 @@ describe('Text Filter Functions', () => {
             id: 4,
             enabled: true,
             target: 'field',
-            fieldName: 'author',
+            fieldName: 'name',
             type: 'pattern',
             isRegex: true,
             flags: 'gi',
@@ -366,7 +366,7 @@ describe('Text Filter Functions', () => {
           },
         ];
 
-        const result = applyTextFilters('Hello filter world!', filters, { field: 'message' });
+        const result = applyTextFilters('Hello filter world!', filters, { fieldName: 'body' });
         assert.equal(result, 'Aello  w');
       });
 
@@ -382,7 +382,7 @@ describe('Text Filter Functions', () => {
           },
         ];
 
-        const result1 = applyTextFilters('test message', filters, { field: 'author' });
+        const result1 = applyTextFilters('test message', filters, { fieldName: 'name' });
         assert.equal(result1, 'テスト message');
 
         const result2 = applyTextFilters('test message', filters);

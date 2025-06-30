@@ -36,10 +36,10 @@ const siteConfigs: SiteConfig[] = [
       attribute: 'id',
     },
     fields: [
-      { name: 'author', selector: '#author-name' },
-      { name: 'message', selector: '#message' },
+      { name: 'name', selector: '#author-name' },
+      { name: 'body', selector: '#message' },
     ],
-    textFormat: '%(author) %(message)',
+    textFormat: '%(name) %(body)',
   },
 ];
 
@@ -91,7 +91,7 @@ const createMonitor = (config: SiteConfig) => () => {
 
     for (const [fieldName, fieldValue] of Object.entries(filteredFieldValues)) {
       const fieldFilters = cachedFilters.filter(f => f.enabled && f.target === 'field' && f.fieldName === fieldName);
-      filteredFieldValues[fieldName] = applyTextFilters(fieldValue, fieldFilters, { field: fieldName, logger });
+      filteredFieldValues[fieldName] = applyTextFilters(fieldValue, fieldFilters, { fieldName, logger });
     }
 
     let formattedText = formatText(config.textFormat, filteredFieldValues);

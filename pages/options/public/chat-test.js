@@ -21,10 +21,10 @@ const randomMessages = [
   'ナイス！',
   '😄',
 ];
-const randomAuthors = ['Donut', 'Choco', 'タルト', 'クレープ'];
+const randomNames = ['Donut', 'Choco', 'タルト', 'クレープ'];
 
-function addMessage({ author, message, isAuto = false }) {
-  if (!author || !message.trim()) {
+function addMessage({ name, body, isAuto = false }) {
+  if (!name || !body.trim()) {
     return;
   }
 
@@ -37,8 +37,8 @@ function addMessage({ author, message, isAuto = false }) {
     messageElement.classList.add('auto-message');
   }
   messageElement.innerHTML =
-    `<yt-live-chat-author-chip id="author-name" style="font-weight: bold; color: #1976d2;">${author}</yt-live-chat-author-chip>` +
-    `<yt-formatted-string id="message">${message}</yt-formatted-string>`;
+    `<yt-live-chat-author-chip id="author-name" style="font-weight: bold; color: #1976d2;">${name}</yt-live-chat-author-chip>` +
+    `<yt-formatted-string id="message">${body}</yt-formatted-string>`;
 
   // Add new message to bottom
   const container = document.getElementById('items');
@@ -56,24 +56,24 @@ function addMessage({ author, message, isAuto = false }) {
   // Auto scroll
   container.scrollTop = container.scrollHeight;
 
-  console.log('Message added:', author, message);
+  console.log('Message added:', name, body);
 }
 
 function addManualMessage() {
-  const authorName = document.getElementById('input-author').value;
-  const messageText = document.getElementById('input-message').value;
+  const name = document.getElementById('input-name').value;
+  const body = document.getElementById('input-body').value;
 
-  if (!messageText.trim()) {
+  if (!body.trim()) {
     return;
   }
 
-  addMessage({ author: authorName, message: messageText, isAuto: false });
+  addMessage({ name, body, isAuto: false });
 }
 
 function addRandomMessage() {
-  const randomAuthor = randomAuthors[Math.floor(Math.random() * randomAuthors.length)];
-  const randomMessage = randomMessages[Math.floor(Math.random() * randomMessages.length)];
-  addMessage({ author: randomAuthor, message: randomMessage, isAuto: true });
+  const name = randomNames[Math.floor(Math.random() * randomNames.length)];
+  const body = randomMessages[Math.floor(Math.random() * randomMessages.length)];
+  addMessage({ name, body, isAuto: true });
 }
 
 function clearMessages() {
@@ -150,7 +150,7 @@ document.addEventListener('keypress', function () {
     (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA' || activeElement.tagName === 'SELECT');
 
   if (!isInputFocused) {
-    const messageInput = document.getElementById('input-message');
+    const messageInput = document.getElementById('input-body');
     if (messageInput) {
       messageInput.focus();
     }
@@ -159,7 +159,7 @@ document.addEventListener('keypress', function () {
 
 // Enter key to send message (always available)
 window.addEventListener('load', function () {
-  const messageInput = document.getElementById('input-message');
+  const messageInput = document.getElementById('input-body');
   if (messageInput) {
     messageInput.addEventListener('keypress', function (e) {
       if (e.key === 'Enter') {
@@ -171,8 +171,8 @@ window.addEventListener('load', function () {
 
 // window.contentloaded
 window.addEventListener('DOMContentLoaded', function () {
-  addMessage({ author: 'System', message: 'Chat test page loaded', isAuto: true });
-  addMessage({ author: randomAuthors.at(-1), message: 'こんにちは', isAuto: true });
+  addMessage({ name: 'System', body: 'Chat test page loaded', isAuto: true });
+  addMessage({ name: randomNames.at(-1), body: 'こんにちは', isAuto: true });
 });
 
 window.addEventListener('load', function () {

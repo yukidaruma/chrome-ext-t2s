@@ -35,7 +35,7 @@ const executeCommand = (text: string, command: string, logger?: typeof loggerTyp
 export const applyTextFilters = (
   text: string,
   filters: TextFilter[],
-  { field, logger }: { field?: string; logger?: typeof loggerType } = {},
+  { fieldName, logger }: { fieldName?: string; logger?: typeof loggerType } = {},
 ): string => {
   let result = text;
 
@@ -43,7 +43,7 @@ export const applyTextFilters = (
     if (!filter.enabled) {
       continue;
     }
-    if (filter.fieldName && filter.fieldName !== field) {
+    if (filter.fieldName && filter.fieldName !== fieldName) {
       continue;
     }
 

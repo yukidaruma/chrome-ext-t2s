@@ -21,12 +21,12 @@ describe('Text-to-Speech Utility Functions', () => {
       } as Element;
 
       const fields: FieldExtractor[] = [
-        { name: 'author', selector: '#author-name' },
-        { name: 'message', selector: '#message' },
+        { name: 'name', selector: '#author-name' },
+        { name: 'body', selector: '#message' },
       ];
 
       const result = extractFieldValues(mockElement, fields);
-      assert.deepEqual(result, { author: 'Donut', message: 'Hi' });
+      assert.deepEqual(result, { name: 'Donut', body: 'Hi' });
     });
 
     it('should extract attributes when specified', () => {
@@ -52,10 +52,10 @@ describe('Text-to-Speech Utility Functions', () => {
         querySelector: (_selector: string) => null,
       } as Element;
 
-      const fields: FieldExtractor[] = [{ name: 'author', selector: '.missing', defaultValue: 'Anonymous' }];
+      const fields: FieldExtractor[] = [{ name: 'name', selector: '.missing', defaultValue: 'Anonymous' }];
 
       const result = extractFieldValues(mockElement, fields);
-      assert.deepEqual(result, { author: 'Anonymous' });
+      assert.deepEqual(result, { name: 'Anonymous' });
     });
 
     it('should handle empty text content', () => {
@@ -86,12 +86,12 @@ describe('Text-to-Speech Utility Functions', () => {
       } as Element;
 
       const fields: FieldExtractor[] = [
-        { name: 'author', selector: '#author-name' },
-        { name: 'message', selector: '#message' },
+        { name: 'name', selector: '#author-name' },
+        { name: 'body', selector: '#message' },
       ];
 
       const result = extractFieldValues(mockElement, fields);
-      assert.deepEqual(result, { author: 'Donut', message: 'Great stream!' });
+      assert.deepEqual(result, { name: 'Donut', body: 'Great stream!' });
     });
   });
 
@@ -102,26 +102,26 @@ describe('Text-to-Speech Utility Functions', () => {
     });
 
     it('should replace multiple field placeholders', () => {
-      const result = formatText('%(author): %(message)', {
-        author: 'Donut',
-        message: 'Hello there',
+      const result = formatText('%(name): %(body)', {
+        name: 'Donut',
+        body: 'Hello there',
       });
       assert.equal(result, 'Donut: Hello there');
     });
 
     // Note: This should not happen in a real application
     it('should replace missing fields with undefined', () => {
-      const result = formatText('%(author): %(message)', { author: 'Donut' });
+      const result = formatText('%(name): %(body)', { name: 'Donut' });
       assert.equal(result, 'Donut: undefined');
     });
 
     it('should handle empty format string', () => {
-      const result = formatText('', { author: 'Donut' });
+      const result = formatText('', { name: 'Donut' });
       assert.equal(result, '');
     });
 
     it('should return text unchanged when no placeholders are used', () => {
-      const result = formatText('Plain text', { author: 'Donut' });
+      const result = formatText('Plain text', { name: 'Donut' });
       assert.equal(result, 'Plain text');
     });
   });

@@ -6,7 +6,7 @@ import type { AddressInfo } from 'net';
 
 declare global {
   interface Window {
-    addMessage: (message: { author: string; message: string; isAuto?: boolean }) => void;
+    addMessage: (message: { name: string; body: string; isAuto?: boolean }) => void;
   }
 }
 
@@ -106,7 +106,7 @@ describe('Text-to-Speech Extension E2E', () => {
 
     // Add a test message to the chat
     await browser.execute(() => {
-      window.addMessage({ author: 'User1', message: 'Test message' });
+      window.addMessage({ name: 'User1', body: 'Test message' });
     });
 
     // waitUntil serves as an implicit assertion; the test will fail on timeout.
@@ -192,8 +192,8 @@ describe('Text-to-Speech Extension E2E', () => {
     // Add multiple messages sequentially
     await Page.loadEventFired();
     await browser.execute(() => {
-      window.addMessage({ author: 'User1', message: 'First message' });
-      window.addMessage({ author: 'User2', message: 'Second message' });
+      window.addMessage({ name: 'User1', body: 'First message' });
+      window.addMessage({ name: 'User2', body: 'Second message' });
     });
 
     // Wait for all messages to be processed sequentially
