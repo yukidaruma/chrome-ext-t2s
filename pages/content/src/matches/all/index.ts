@@ -5,6 +5,7 @@ import {
   speakText,
   normalizeWhitespaces,
   findSiteConfigByUrl,
+  retryForValue,
 } from '@extension/shared/lib/utils';
 import { applyTextFilters } from '@extension/shared/lib/utils/text-filter';
 import { extensionEnabledStorage, textFilterStorage, ttsVoiceEngineStorage } from '@extension/storage';
@@ -12,7 +13,7 @@ import type { SiteConfig } from '@extension/shared/lib/utils/site-config';
 
 logger.log('All content script loaded');
 
-const createMonitor = (config: SiteConfig) => () => {
+const createMonitor = (config: SiteConfig) => async () => {
   logger.debug(`${config.name} monitoring started.`);
 
   // Subscribe to filter changes
@@ -25,32 +26,33 @@ const createMonitor = (config: SiteConfig) => () => {
   });
 
   // Start observing updates
-  let containerNode!: Element | null;
+  let containerNode: Element = document.body;
   if (config.containerSelector) {
-    containerNode = document.querySelector(config.containerSelector);
-  }
-  containerNode ??= document.body;
-
-  let lastMessageId: string | null = null;
-  switch (config.detectUpdateBy?.type) {
-    case 'attribute': {
-      const lastElement = containerNode.querySelector(`${config.messageSelector}:last-of-type`);
-      lastMessageId = lastElement?.getAttribute(config.detectUpdateBy.attribute) ?? null;
+    const containerNodeFound = await retryForValue(() => document.querySelector(config.containerSelector!), {
+      // Retry up to 5 seconds
+      retries: 50,
+      baseDelay: 100,
+    });
+    if (containerNodeFound) {
+      containerNode = containerNodeFound;
     }
   }
-  logger.debug(`Initial lastMessageId: ${lastMessageId}`);
 
-  const extractMessageData = (element: Element): { id: string | null; text: string } | null => {
-    let elementId: string | null = null;
-    switch (config.detectUpdateBy?.type) {
-      case 'attribute':
-        elementId = element.getAttribute(config.detectUpdateBy.attribute);
-        if (!elementId) return null;
-        break;
-      default:
-        break;
+  // Wait for page to load if loadDetectionSelector is specified
+  if (config.loadDetectionSelector) {
+    const loadDetectionElement = await retryForValue(() => containerNode.querySelector(config.loadDetectionSelector!), {
+      // Retry up to 10 seconds
+      retries: 100,
+      baseDelay: 100,
+    });
+    if (!loadDetectionElement) {
+      logger.warn(`Load detection element not found: ${config.loadDetectionSelector}`);
+      return;
     }
+    logger.debug(`Load detection element found: ${config.loadDetectionSelector}`);
+  }
 
+  const extractMessageData = (element: Element): string | null => {
     const fieldValues = extractFieldValues(element, config.fields);
     const hasContent = Object.values(fieldValues).some(value => value !== '');
     if (!hasContent) return null;
@@ -69,60 +71,13 @@ const createMonitor = (config: SiteConfig) => () => {
     const outputFilters = cachedFilters.filter(f => f.enabled && f.target === 'output');
     formattedText = applyTextFilters(formattedText, outputFilters, { logger });
 
-    return {
-      id: elementId,
-      // Re-normalize whitespace. formattedText may contain extra spacing from:
-      // - formatText: user-supplied format string with multiple spaces
-      // - applyTextFilters: text replacements
-      text: normalizeWhitespaces(formattedText),
-    };
+    // Re-normalize whitespace. formattedText may contain extra spacing from:
+    // - formatText: user-supplied format string with multiple spaces
+    // - applyTextFilters: text replacements
+    return normalizeWhitespaces(formattedText);
   };
 
-  const scanExistingMessages = (container: Element): void => {
-    container.querySelectorAll(config.messageSelector).forEach(element => {
-      const messageData = extractMessageData(element);
-      if (messageData?.id) {
-        lastMessageId = messageData.id;
-      }
-    });
-  };
-
-  const findNewMessages = (container: Element): Array<{ id: string | null; text: string }> => {
-    let foundPreviousLastMessage = !lastMessageId;
-    const newMessages: Array<{ id: string | null; text: string }> = [];
-
-    container.querySelectorAll(config.messageSelector).forEach(element => {
-      let elementId: string | null = null;
-      switch (config.detectUpdateBy?.type) {
-        case 'attribute':
-          elementId = element.getAttribute(config.detectUpdateBy.attribute);
-          if (!elementId) return;
-
-          if (elementId === lastMessageId) {
-            foundPreviousLastMessage = true;
-            return;
-          }
-          if (!foundPreviousLastMessage) {
-            return;
-          }
-          break;
-        default:
-          break;
-      }
-
-      const messageData = extractMessageData(element);
-      if (messageData) {
-        newMessages.push(messageData);
-        if (messageData.id) {
-          lastMessageId = messageData.id;
-        }
-      }
-    });
-
-    return newMessages;
-  };
-
-  const queueMessages = async (messages: Array<{ id: string | null; text: string }>) => {
+  const queueMessages = async (messages: string[]) => {
     const { enabled } = await extensionEnabledStorage.get();
     if (!enabled) {
       logger.debug('Extension is disabled, skipping speech');
@@ -132,34 +87,42 @@ const createMonitor = (config: SiteConfig) => () => {
     const { uri: storedVoiceURI } = await ttsVoiceEngineStorage.get();
 
     for (const message of messages) {
-      logger.debug(`Added new message to speech queue: ${message.text}`);
+      logger.debug(`Added new message to speech queue: ${message}`);
 
-      await speakText(message.text, storedVoiceURI, logger);
+      await speakText(message, storedVoiceURI, logger);
     }
   };
 
-  // Initial scan for existing messages to set lastMessageId (does not speak them)
-  scanExistingMessages(containerNode);
-
   // Set up MutationObserver to watch for new messages
   const observer = new MutationObserver(mutations => {
-    checkMutations: for (const mutation of mutations) {
+    const newMessages: string[] = [];
+
+    for (const mutation of mutations) {
       if (mutation.type !== 'childList') {
         continue;
       }
+
+      console.log('Mutation detected:', mutation, mutation.addedNodes.item(0)?.textContent, mutation.addedNodes.length);
 
       // Check if any added nodes match message selector or contain matching elements
       for (let i = 0; i < mutation.addedNodes.length; i++) {
         const node = mutation.addedNodes.item(i)!;
         if (node.nodeType === Node.ELEMENT_NODE) {
           const element = node as Element;
-          if (element.matches(config.messageSelector)) {
-            const newMessages = findNewMessages(containerNode);
-            queueMessages(newMessages);
-            break checkMutations;
+          // Check if the element itself matches the message selector;
+          // if not, check if it contains any matching elements
+          if (element.matches(config.messageSelector) || element.querySelector(config.messageSelector)) {
+            const messageText = extractMessageData(element);
+            if (messageText) {
+              newMessages.push(messageText);
+            }
           }
         }
       }
+    }
+
+    if (newMessages.length > 0) {
+      queueMessages(newMessages);
     }
   });
 

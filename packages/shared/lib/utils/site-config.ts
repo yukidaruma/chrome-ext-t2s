@@ -1,16 +1,11 @@
 import type { FieldExtractor } from './text-to-speech.js';
 
-export type DetectUpdateByAttribute = {
-  type: 'attribute';
-  attribute: string;
-};
-
 export type SiteConfig = {
   name: string;
   urlPatterns: string[];
   containerSelector?: string;
+  loadDetectionSelector?: string; // If specified, will wait for the matching element to appear before processing messages
   messageSelector: string;
-  detectUpdateBy?: DetectUpdateByAttribute;
   fields: FieldExtractor[];
   textFormat: string;
   pollingInterval?: number;
@@ -22,13 +17,21 @@ export const siteConfigs: SiteConfig[] = [
     urlPatterns: ['https://www.youtube.com/live_chat', 'https://studio.youtube.com/live_chat'],
     containerSelector: '#items',
     messageSelector: 'yt-live-chat-text-message-renderer:not([author-type="owner"])',
-    detectUpdateBy: {
-      type: 'attribute',
-      attribute: 'id',
-    },
     fields: [
       { name: 'name', selector: '#author-name' },
       { name: 'body', selector: '#message' },
+    ],
+    textFormat: '%(name) %(body)',
+  },
+  {
+    name: 'Twitch Chat',
+    urlPatterns: ['https://www.twitch.tv/'],
+    containerSelector: '.chat-scrollable-area__message-container',
+    loadDetectionSelector: '.live-message-separator-line__hr',
+    messageSelector: '.chat-line__message-container',
+    fields: [
+      { name: 'name', selector: '.chat-author__display-name' },
+      { name: 'body', selector: '[data-a-target="chat-line-message-body"]' },
     ],
     textFormat: '%(name) %(body)',
   },
