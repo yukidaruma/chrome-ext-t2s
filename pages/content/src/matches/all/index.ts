@@ -214,6 +214,8 @@ const main = () => {
 
   logger.debug(`Site configuration found: ${siteConfig.name}`);
 
+  speechSynthesis.getVoices(); // Ensure voices are loaded on first speechSynthesis.speak call
+
   const monitor = createMonitor(siteConfig);
   monitor();
 };
