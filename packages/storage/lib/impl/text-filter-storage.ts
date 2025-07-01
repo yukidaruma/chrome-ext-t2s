@@ -8,7 +8,7 @@ const storage = createStorage<TextFilterStateType>(
     nextId: 1,
   },
   {
-    storageEnum: StorageEnum.Local,
+    storageEnum: StorageEnum.Sync,
     liveUpdate: true,
   },
 );

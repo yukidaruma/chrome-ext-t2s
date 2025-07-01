@@ -22,20 +22,38 @@
   "disabled": {
     "message": "Disabled"
   },
-  "openPage": {
-    "message": "Open $1"
-  },
   "settings": {
     "message": "Settings"
   },
-  "testPage": {
-    "message": "Test Page"
+  "settingsTitle": {
+    "message": "Settings"
   },
-  "testVoice": {
-    "message": "Test Voice"
+  "extensionState": {
+    "message": "Extension State"
+  },
+  "theme": {
+    "message": "Theme"
+  },
+  "lightMode": {
+    "message": "Light Mode"
+  },
+  "darkMode": {
+    "message": "Dark Mode"
+  },
+  "language": {
+    "message": "Language"
   },
   "voiceEngine": {
     "message": "Voice Engine"
+  },
+  "noVoiceSelected": {
+    "message": "No voice selected"
+  },
+  "loadingVoices": {
+    "message": "Loading voices..."
+  },
+  "testVoice": {
+    "message": "Test Voice"
   },
   "voiceTestMessage": {
     "message": "Hello, this is a test message"
@@ -43,26 +61,17 @@
   "voiceVolume": {
     "message": "Voice Volume"
   },
+  "openPage": {
+    "message": "Open $1"
+  },
+  "testPage": {
+    "message": "Test Page"
+  },
   "githubRepository": {
     "message": "GitHub repository"
   },
   "xProfile": {
     "message": "X profile"
-  },
-  "settingsTitle": {
-    "message": "Settings"
-  },
-  "theme": {
-    "message": "Theme"
-  },
-  "language": {
-    "message": "Language"
-  },
-  "lightMode": {
-    "message": "Light Mode"
-  },
-  "darkMode": {
-    "message": "Dark Mode"
   },
   "displayErrorInfo": {
     "message": "Error occur"

@@ -7,7 +7,7 @@ const storage = createStorage<LogConsoleStateType>(
     enabled: false,
   },
   {
-    storageEnum: StorageEnum.Local,
+    storageEnum: StorageEnum.Sync,
     liveUpdate: true,
   },
 );

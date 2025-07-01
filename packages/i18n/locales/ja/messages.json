@@ -22,20 +22,38 @@
   "disabled": {
     "message": "オフ"
   },
-  "openPage": {
-    "message": "$1を開く"
-  },
   "settings": {
     "message": "設定"
   },
-  "testPage": {
-    "message": "テスト用画面"
+  "settingsTitle": {
+    "message": "設定"
   },
-  "testVoice": {
-    "message": "音声テスト"
+  "extensionState": {
+    "message": "拡張機能のステータス"
+  },
+  "theme": {
+    "message": "テーマ"
+  },
+  "lightMode": {
+    "message": "ライトモード"
+  },
+  "darkMode": {
+    "message": "ダークモード"
+  },
+  "language": {
+    "message": "言語"
   },
   "voiceEngine": {
     "message": "音声エンジン"
+  },
+  "noVoiceSelected": {
+    "message": "音声が選択されていません"
+  },
+  "loadingVoices": {
+    "message": "音声を読み込み中..."
+  },
+  "testVoice": {
+    "message": "音声テスト"
   },
   "voiceTestMessage": {
     "message": "こんにちは、これはテストメッセージです"
@@ -43,26 +61,17 @@
   "voiceVolume": {
     "message": "音量"
   },
+  "openPage": {
+    "message": "$1を開く"
+  },
+  "testPage": {
+    "message": "テスト用画面"
+  },
   "githubRepository": {
     "message": "GitHubリポジトリ"
   },
   "xProfile": {
-    "message": "Xプロフィール"
-  },
-  "settingsTitle": {
-    "message": "設定"
-  },
-  "theme": {
-    "message": "テーマ"
-  },
-  "language": {
-    "message": "言語"
-  },
-  "lightMode": {
-    "message": "ライトモード"
-  },
-  "darkMode": {
-    "message": "ダークモード"
+    "message": "Xアカウント"
   },
   "displayErrorInfo": {
     "message": "エラーが発生しました"

@@ -8,7 +8,7 @@ const storage = createStorage<ThemeStateType>(
     isLight: true,
   },
   {
-    storageEnum: StorageEnum.Local,
+    storageEnum: StorageEnum.Sync,
     liveUpdate: true,
   },
 );

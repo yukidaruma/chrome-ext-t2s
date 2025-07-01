@@ -1,6 +1,6 @@
 import '@src/Popup.css';
 import { t } from '@extension/i18n';
-import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
+import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
 import { exampleThemeStorage, extensionEnabledStorage } from '@extension/storage';
 import { cn, ErrorDisplay, getIconColor, icons, LoadingSpinner, ToggleButton } from '@extension/ui';
 
@@ -26,26 +26,6 @@ const Popup = () => {
             label={enabled ? t('enabled') : t('disabled')}
             srOnlyLabel={t('toggleExtension')}
           />
-        </div>
-      </div>
-
-      <div className="mt-4">
-        <h3 className="mb-2 text-lg">{t('contacts')}</h3>
-        <div className="space-x-2">
-          <a
-            href={PROJECT_URL_OBJECT.url}
-            target="_blank"
-            title={t('openPage', t('githubRepository'))}
-            aria-label={t('githubRepository')}>
-            <icons.Github color={iconColor} size="32" />
-          </a>
-          <a
-            href={PROJECT_URL_OBJECT.x}
-            target="_blank"
-            title={t('openPage', t('xProfile'))}
-            aria-label={t('xProfile')}>
-            <icons.X color={iconColor} size="32" />
-          </a>
         </div>
       </div>
     </div>

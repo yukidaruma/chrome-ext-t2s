@@ -7,7 +7,7 @@ const storage = createStorage<ExtensionEnabledStateType>(
     enabled: true,
   },
   {
-    storageEnum: StorageEnum.Local,
+    storageEnum: StorageEnum.Sync,
     liveUpdate: true,
   },
 );

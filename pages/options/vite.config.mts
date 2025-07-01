@@ -13,5 +13,13 @@ export default withPageConfig({
   publicDir: resolve(rootDir, 'public'),
   build: {
     outDir: resolve(rootDir, '..', '..', 'dist', 'options'),
+    rollupOptions: {
+      input: {
+        index: resolve('index.html'),
+        'chat-test': resolve('chat-test.html'),
+      },
+      // Necessary to suppress build warnings. The file comes from the content script.
+      external: ['/content/all.iife.js'],
+    },
   },
 });

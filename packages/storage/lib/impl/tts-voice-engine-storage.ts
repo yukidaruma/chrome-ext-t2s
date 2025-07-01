@@ -7,7 +7,7 @@ const storage = createStorage<TtsVoiceEngineStateType>(
     uri: null,
   },
   {
-    storageEnum: StorageEnum.Local,
+    storageEnum: StorageEnum.Sync,
     liveUpdate: true,
   },
 );

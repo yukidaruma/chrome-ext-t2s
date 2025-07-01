@@ -7,7 +7,7 @@ const storage = createStorage<TtsVolumeStateType>(
     volume: 1.0, // Default to 100% volume
   },
   {
-    storageEnum: StorageEnum.Local,
+    storageEnum: StorageEnum.Sync,
     liveUpdate: true,
   },
 );

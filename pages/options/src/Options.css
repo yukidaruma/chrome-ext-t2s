@@ -4,8 +4,37 @@
 }
 
 .App {
+  @apply p-6;
   width: 100vw;
   height: 100vh;
   background-color: var(--bg-primary);
   color: var(--text-primary);
+}
+
+h1 {
+  @apply mb-4 text-2xl font-bold;
+}
+h2 {
+  @apply mb-2 text-lg font-semibold;
+}
+input,
+select {
+  @apply max-w-72 flex-1 rounded border p-2;
+  color: var(--text-secondary);
+  background-color: var(--bg-secondary);
+  border-color: var(--border-primary);
+}
+input[type='range'] {
+  padding: 0;
+}
+button {
+  @apply flex-shrink-0 rounded px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50;
+  background-color: var(--bg-button);
+  border: 1px solid var(--border-button);
+  color: var(--text-primary);
+}
+input:disabled,
+select:disabled,
+button:disabled {
+  @apply disabled:cursor-not-allowed disabled:opacity-50;
 }

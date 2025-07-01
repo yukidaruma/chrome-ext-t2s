@@ -8,7 +8,7 @@ const storage = createStorage<LogStateType>(
     maxEntries: 1000,
   },
   {
-    storageEnum: StorageEnum.Local,
+    storageEnum: StorageEnum.Local, // Local storage is used only for logs
     liveUpdate: true,
   },
 );

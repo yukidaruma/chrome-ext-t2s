@@ -7,7 +7,7 @@ const storage = createStorage<LanguageStateType>(
     language: 'en',
   },
   {
-    storageEnum: StorageEnum.Local,
+    storageEnum: StorageEnum.Sync,
     liveUpdate: true,
   },
 );

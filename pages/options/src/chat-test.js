@@ -1,3 +1,6 @@
+import './index.css';
+import './Options.css';
+
 /* eslint-disable no-undef */
 
 // Load the content script in test page in options
@@ -37,7 +40,7 @@ function addMessage({ name, body, isAuto = false }) {
     messageElement.classList.add('auto-message');
   }
   messageElement.innerHTML =
-    `<yt-live-chat-author-chip id="author-name" style="font-weight: bold; color: #1976d2;">${name}</yt-live-chat-author-chip>` +
+    `<yt-live-chat-author-chip id="author-name">${name}</yt-live-chat-author-chip>` +
     `<yt-formatted-string id="message">${body}</yt-formatted-string>`;
 
   // Add new message to bottom
@@ -86,7 +89,7 @@ function isAutoMode() {
 }
 
 function updateModeDisplay() {
-  isAuto = isAutoMode();
+  const isAuto = isAutoMode();
   document.body.setAttribute('data-auto-mode', isAuto.toString());
 
   if (isAuto) {
@@ -97,6 +100,8 @@ function updateModeDisplay() {
 }
 
 function startAutoMode() {
+  document.getElementById('select-interval').disabled = false;
+
   const intervalMs = parseInt(document.getElementById('select-interval').value);
   autoPostTimer = setInterval(() => {
     addRandomMessage();
@@ -104,6 +109,8 @@ function startAutoMode() {
 }
 
 function stopAutoMode() {
+  document.getElementById('select-interval').disabled = true;
+
   if (autoPostTimer) {
     clearInterval(autoPostTimer);
     autoPostTimer = null;
@@ -118,7 +125,8 @@ function updateInterval() {
 }
 
 function toggleMode(toAuto) {
-  location.hash = toAuto ? '#auto' : '';
+  history.replaceState(null, '', location.pathname + (toAuto ? '#auto' : ''));
+  window.dispatchEvent(new HashChangeEvent('hashchange'));
 }
 
 // Listen for hash changes
@@ -157,7 +165,11 @@ document.addEventListener('keypress', function () {
   }
 });
 
-// Enter key to send message (always available)
+window.addEventListener('DOMContentLoaded', function () {
+  addMessage({ name: 'System', body: 'Chat test page loaded', isAuto: true });
+  addMessage({ name: randomNames.at(-1), body: 'こんにちは', isAuto: true });
+});
+
 window.addEventListener('load', function () {
   const messageInput = document.getElementById('input-body');
   if (messageInput) {
@@ -167,15 +179,7 @@ window.addEventListener('load', function () {
       }
     });
   }
-});
 
-// window.contentloaded
-window.addEventListener('DOMContentLoaded', function () {
-  addMessage({ name: 'System', body: 'Chat test page loaded', isAuto: true });
-  addMessage({ name: randomNames.at(-1), body: 'こんにちは', isAuto: true });
-});
-
-window.addEventListener('load', function () {
   // Initialize on page load
   updateModeDisplay();
 
@@ -187,11 +191,18 @@ window.addEventListener('load', function () {
   // Add mode toggle listeners
   document.querySelectorAll('.mode-toggle').forEach(toggle => {
     toggle.addEventListener('click', () => {
-      const mode = toggle.dataset.mode;
-      toggleMode(mode === 'auto');
+      const newMode = toggle.dataset.newMode;
+      toggleMode(newMode === 'auto');
     });
   });
 
   // Add interval change listener
   document.getElementById('select-interval').addEventListener('change', updateInterval);
 });
+
+if (!navigator.webdriver) {
+  chrome.storage.sync.get('theme-storage-key', function (data) {
+    const theme = data['theme-storage-key'].theme ?? 'light';
+    document.body.classList.add(theme);
+  });
+}

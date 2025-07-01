@@ -35,8 +35,10 @@ code {
   --text-secondary: var(--color-gray-700);
   --bg-primary: var(--color-slate-50);
   --bg-secondary: var(--color-white);
+  --bg-button: var(--color-gray-200);
   --border-primary: var(--color-gray-300);
   --border-secondary: var(--color-gray-200);
+  --border-button: var(--color-gray-400);
   --icon-primary: var(--color-gray-800);
 }
 .App.dark {
@@ -44,8 +46,10 @@ code {
   --text-secondary: var(--color-gray-300);
   --bg-primary: var(--color-gray-800);
   --bg-secondary: var(--color-gray-700);
+  --bg-button: var(--color-gray-600);
   --border-primary: var(--color-gray-600);
   --border-secondary: var(--color-gray-500);
+  --border-button: var(--color-gray-400);
   --icon-primary: var(--color-gray-100);
 }
 
@@ -56,12 +60,14 @@ code {
 .text-secondary {
   color: var(--text-secondary);
 }
-
 .bg-primary {
   background-color: var(--bg-primary);
 }
 .bg-secondary {
   background-color: var(--bg-secondary);
+}
+.bg-button {
+  background-color: var(--bg-button);
 }
 
 .border-primary {
@@ -70,11 +76,15 @@ code {
 .border-secondary {
   border-color: var(--border-secondary);
 }
+.border-button {
+  border-color: var(--border-button);
+}
 
-a {
+/* Element styles */
+a:not(button a) {
   color: theme('colors.blue.600');
   text-decoration: underline;
 }
-.App.dark a {
+.App.dark a:not(button a) {
   color: theme('colors.blue.400');
 }
