@@ -2,6 +2,7 @@ import '@src/Options.css';
 import { t } from '@extension/i18n';
 import { supportedLanguages } from '@extension/i18n/lib/types';
 import { PROJECT_URL_OBJECT, useDebounce, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
+import { speakText } from '@extension/shared/lib/utils';
 import {
   exampleThemeStorage,
   extensionEnabledStorage,
@@ -23,6 +24,7 @@ const Options = () => {
   const [localVolume, setLocalVolume] = useState(storedVolume);
   const [isTestingVoice, setIsTestingVoice] = useState(false);
   const currentVolumeRef = useRef(storedVolume);
+  const cancelTestSpeechRef = useRef<(() => void) | null>(null);
 
   // Check if we're in inline mode (embedded in iframe)
   const isInline = new URLSearchParams(window.location.search).has('inline');
@@ -52,17 +54,13 @@ const Options = () => {
 
   const testVoice = () => {
     setIsTestingVoice(true);
-    const utterance = new SpeechSynthesisUtterance(t('voiceTestMessage'));
-    const selectedVoice = voices.find(voice => voice.voiceURI === voiceURI);
-    if (selectedVoice) {
-      utterance.voice = selectedVoice;
-    }
-    utterance.volume = localVolume;
+    const speech = speakText(t('voiceTestMessage'), voiceURI);
+    cancelTestSpeechRef.current = speech.cancel;
 
-    utterance.onend = () => setIsTestingVoice(false);
-    utterance.onerror = () => setIsTestingVoice(false);
-
-    speechSynthesis.speak(utterance);
+    speech.promise.finally(() => {
+      setIsTestingVoice(false);
+      cancelTestSpeechRef.current = null;
+    });
   };
 
   useEffect(() => {
@@ -101,6 +99,13 @@ const Options = () => {
   useEffect(() => {
     setLocalVolume(storedVolume);
   }, [storedVolume]);
+
+  // Cancel test voice when extension is disabled
+  useEffect(() => {
+    if (!enabled && isTestingVoice) {
+      cancelTestSpeechRef.current?.();
+    }
+  }, [enabled, isTestingVoice]);
 
   return (
     <div className={cn('App', isLight ? 'light' : 'dark')}>
@@ -157,7 +162,7 @@ const Options = () => {
                 </option>
               )}
             </select>
-            <button onClick={testVoice} disabled={isTestingVoice}>
+            <button onClick={testVoice} disabled={!enabled || isTestingVoice}>
               {t('testVoice')}
             </button>
           </div>

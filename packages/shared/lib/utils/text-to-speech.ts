@@ -36,29 +36,62 @@ export const formatText = (format: string, fields: Record<string, string>): stri
 
 export const normalizeWhitespaces = (text: string): string => text.replace(/\s+/g, ' ').trim();
 
-export const speakText = async (text: string, voiceURI: string | null, logger?: typeof loggerType): Promise<void> => {
-  const voices = speechSynthesis.getVoices();
+export type CancellableSpeech = {
+  promise: Promise<boolean>; // Resolves to true if speech completed successfully, false if cancelled
+  cancel: () => void;
+};
+
+export const speakText = (
+  text: string,
+  voiceURI: string | null,
+  { logger }: { logger?: typeof loggerType } = {},
+): CancellableSpeech => {
   const utterance = new SpeechSynthesisUtterance(text);
+  let resolved = false;
+  let resolvePromise: (value: boolean) => void;
 
-  // Apply volume setting
-  const { volume } = await ttsVolumeStorage.get();
-  utterance.volume = volume;
+  const promise = new Promise<boolean>((resolve, reject) => {
+    resolvePromise = resolve;
 
-  if (voiceURI) {
-    const voice = voices.find(v => v.voiceURI === voiceURI);
-    if (voice) {
-      utterance.voice = voice;
-    } else {
-      logger?.warn(`voice: ${voiceURI} not found`);
+    const { volume } = ttsVolumeStorage.getSnapshot() ?? {};
+    if (volume) {
+      utterance.volume = volume;
     }
-  }
 
-  return new Promise(resolve => {
+    if (voiceURI) {
+      const voices = speechSynthesis.getVoices();
+      const voice = voices.find(v => v.voiceURI === voiceURI);
+      if (voice) {
+        utterance.voice = voice;
+      } else {
+        logger?.warn(`voice: ${voiceURI} not found`);
+      }
+    }
+
     utterance.onend = () => {
-      logger?.debug(`speech end: ${text}`);
-      resolve();
+      if (!resolved) {
+        resolved = true;
+        resolve(true);
+      }
+    };
+
+    utterance.onerror = event => {
+      if (!resolved) {
+        resolved = true;
+        reject(new Error(`Speech synthesis error: ${event.error}`));
+      }
     };
 
     speechSynthesis.speak(utterance);
   });
+
+  const cancel = () => {
+    if (!resolved) {
+      resolved = true;
+      speechSynthesis.cancel();
+      resolvePromise(false);
+    }
+  };
+
+  return { promise, cancel };
 };

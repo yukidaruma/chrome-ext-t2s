@@ -69,17 +69,30 @@ const createMonitor = (config: SiteConfig) => () => {
     isProcessing = true;
 
     const { enabled } = await extensionEnabledStorage.get();
-    if (enabled && messageQueue.length > 0) {
-      const { uri: storedVoiceURI } = await ttsVoiceEngineStorage.get();
+    const { uri: storedVoiceURI } = await ttsVoiceEngineStorage.get();
 
-      while (messageQueue.length > 0) {
-        const message = messageQueue.shift()!;
-        logger.debug(`Speaking queued message: ${message}`);
-        await speakText(message, storedVoiceURI, logger);
+    while (enabled && messageQueue.length > 0) {
+      const message = messageQueue.shift()!;
+      logger.debug(`Start speech: ${message}`);
+
+      const { promise, cancel } = speakText(message, storedVoiceURI, { logger });
+      const unsubscribe = extensionEnabledStorage.subscribe(() => {
+        const snapshot = extensionEnabledStorage.getSnapshot();
+        if (snapshot && !snapshot.enabled) {
+          logger.debug('Extension disabled, canceling current speech');
+          isProcessing = false;
+
+          cancel();
+
+          messageQueue.length = 0; // Clear the queue
+        }
+      });
+
+      const speechResult = await promise;
+      if (speechResult) {
+        logger.debug(`Finished speech: ${message}`);
       }
-    } else if (!enabled && messageQueue.length > 0) {
-      logger.debug('Extension is disabled, clearing speech queue');
-      messageQueue.length = 0;
+      unsubscribe();
     }
 
     isProcessing = false;
