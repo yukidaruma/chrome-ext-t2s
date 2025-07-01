@@ -31,6 +31,15 @@
   "testPage": {
     "message": "テスト用画面"
   },
+  "testVoice": {
+    "message": "音声テスト"
+  },
+  "voiceEngine": {
+    "message": "音声エンジン"
+  },
+  "voiceTestMessage": {
+    "message": "こんにちは、これはテストメッセージです"
+  },
   "voiceVolume": {
     "message": "音量"
   },

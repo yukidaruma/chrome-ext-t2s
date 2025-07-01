@@ -2,13 +2,16 @@ import '@src/Options.css';
 import { t } from '@extension/i18n';
 import { supportedLanguages } from '@extension/i18n/lib/types';
 import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage, languageStorage, ttsVolumeStorage } from '@extension/storage';
+import { exampleThemeStorage, languageStorage, ttsVoiceEngineStorage, ttsVolumeStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
+import { useEffect, useState } from 'react';
 
 const Options = () => {
   const { isLight } = useStorage(exampleThemeStorage);
   const { language } = useStorage(languageStorage);
   const { volume } = useStorage(ttsVolumeStorage);
+  const { uri: voiceURI } = useStorage(ttsVoiceEngineStorage);
+  const [voices, setVoices] = useState<SpeechSynthesisVoice[]>([]);
 
   const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     languageStorage.setLanguage(event.target.value);
@@ -18,6 +21,37 @@ const Options = () => {
     const newVolume = parseFloat(event.target.value);
     ttsVolumeStorage.setVolume(newVolume);
   };
+
+  const handleVoiceEngineChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value;
+    ttsVoiceEngineStorage.setUri(value === '' ? null : value);
+  };
+
+  const testVoice = () => {
+    if (!voiceURI) return;
+
+    const utterance = new SpeechSynthesisUtterance(t('voiceTestMessage'));
+    const selectedVoice = voices.find(voice => voice.voiceURI === voiceURI);
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+    utterance.volume = volume;
+    speechSynthesis.speak(utterance);
+  };
+
+  useEffect(() => {
+    const loadVoices = () => {
+      const availableVoices = speechSynthesis.getVoices();
+      setVoices(availableVoices);
+    };
+
+    loadVoices();
+    speechSynthesis.addEventListener('voiceschanged', loadVoices);
+
+    return () => {
+      speechSynthesis.removeEventListener('voiceschanged', loadVoices);
+    };
+  }, []);
 
   return (
     <div className={cn('App p-6', isLight ? 'light' : 'dark')}>
@@ -45,6 +79,39 @@ const Options = () => {
               </option>
             ))}
           </select>
+        </div>
+
+        <div>
+          <h2 className="mb-2 text-lg font-semibold">{t('voiceEngine')}</h2>
+          <div className="flex items-center space-x-2">
+            <select
+              value={voiceURI ?? ''}
+              onChange={handleVoiceEngineChange}
+              className="text-secondary bg-secondary border-primary rounded border px-3 py-2">
+              {voices.length > 0 ? (
+                <>
+                  <option value="" selected={voiceURI === null}>
+                    No voice selected
+                  </option>
+                  {voices.map(voice => (
+                    <option key={voice.voiceURI} value={voice.voiceURI} selected={voiceURI === voice.voiceURI}>
+                      [{voice.lang}] {voice.name}
+                    </option>
+                  ))}
+                </>
+              ) : (
+                <option value="" disabled>
+                  Loading voices...
+                </option>
+              )}
+            </select>
+            <button
+              onClick={testVoice}
+              disabled={!voiceURI}
+              className="bg-primary text-primary-foreground rounded border px-3 py-2 disabled:cursor-not-allowed disabled:opacity-50">
+              {t('testVoice')}
+            </button>
+          </div>
         </div>
 
         <div>

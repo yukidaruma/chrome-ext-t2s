@@ -1,12 +1,9 @@
 import { logger, formatText, extractFieldValues, speakText, normalizeWhitespaces } from '@extension/shared/lib/utils';
 import { applyTextFilters } from '@extension/shared/lib/utils/text-filter';
-import { extensionEnabledStorage, textFilterStorage } from '@extension/storage';
+import { extensionEnabledStorage, textFilterStorage, ttsVoiceEngineStorage } from '@extension/storage';
 import type { FieldExtractor } from '@extension/shared/lib/utils/text-to-speech';
 
 logger.log('All content script loaded');
-
-// TODO: Replace with values from user preferences
-const GLOBAL_VOICE_URI: string | null = 'Google 日本語';
 
 type DetectUpdateByAttribute = {
   type: 'attribute';
@@ -21,7 +18,6 @@ type SiteConfig = {
   detectUpdateBy?: DetectUpdateByAttribute;
   fields: FieldExtractor[];
   textFormat: string;
-  voiceURI?: string;
   pollingInterval?: number;
 };
 
@@ -160,11 +156,12 @@ const createMonitor = (config: SiteConfig) => () => {
       return;
     }
 
+    const { uri: storedVoiceURI } = await ttsVoiceEngineStorage.get();
+
     for (const message of messages) {
       logger.debug(`Added new message to speech queue: ${message.text}`);
 
-      const resolvedVoiceURI = config.voiceURI ?? GLOBAL_VOICE_URI;
-      await speakText(message.text, resolvedVoiceURI, logger);
+      await speakText(message.text, storedVoiceURI, logger);
     }
   };
 

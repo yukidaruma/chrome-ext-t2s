@@ -97,14 +97,6 @@ export type ToggleStorageType<T> = BaseStorageType<T> & {
 };
 export type ThemeStorageType = ToggleStorageType<ThemeStateType>;
 
-// tts-volume-storage.ts
-export type TtsVolumeStateType = {
-  volume: number; // 0.0 to 1.0
-};
-export type TtsVolumeStorageType = BaseStorageType<TtsVolumeStateType> & {
-  setVolume: (volume: number) => Promise<void>;
-};
-
 // text-filter-storage.ts
 export type BaseTextFilter = {
   id: number;
@@ -137,4 +129,20 @@ export type TextFilterStorageType = BaseStorageType<TextFilterStateType> & {
   addFilter: (filterData: Omit<TextFilter, 'id'>) => Promise<TextFilter>;
   removeFilter: (id: number) => Promise<void>;
   updateFilter: (id: number, updates: Partial<Omit<TextFilter, 'id'>>) => Promise<void>;
+};
+
+// tts-voice-engine-storage.ts
+export type TtsVoiceEngineStateType = {
+  uri: string | null; // Voice URI like "Microsoft Ayumi - Japanese (Japan)" or "Google 日本語"
+};
+export type TtsVoiceEngineStorageType = BaseStorageType<TtsVoiceEngineStateType> & {
+  setUri: (uri: string | null) => Promise<void>;
+};
+
+// tts-volume-storage.ts
+export type TtsVolumeStateType = {
+  volume: number; // 0.0 to 1.0
+};
+export type TtsVolumeStorageType = BaseStorageType<TtsVolumeStateType> & {
+  setVolume: (volume: number) => Promise<void>;
 };

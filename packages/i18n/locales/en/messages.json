@@ -31,6 +31,15 @@
   "testPage": {
     "message": "Test Page"
   },
+  "testVoice": {
+    "message": "Test Voice"
+  },
+  "voiceEngine": {
+    "message": "Voice Engine"
+  },
+  "voiceTestMessage": {
+    "message": "Hello, this is a test message"
+  },
   "voiceVolume": {
     "message": "Voice Volume"
   },
