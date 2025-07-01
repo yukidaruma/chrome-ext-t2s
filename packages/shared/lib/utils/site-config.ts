@@ -1,16 +1,10 @@
 import type { FieldExtractor } from './text-to-speech.js';
 
-export type DetectUpdateByAttribute = {
-  type: 'attribute';
-  attribute: string;
-};
-
 export type SiteConfig = {
   name: string;
   urlPatterns: string[];
   containerSelector?: string;
   messageSelector: string;
-  detectUpdateBy?: DetectUpdateByAttribute;
   fields: FieldExtractor[];
   textFormat: string;
   pollingInterval?: number;
@@ -22,10 +16,6 @@ export const siteConfigs: SiteConfig[] = [
     urlPatterns: ['https://www.youtube.com/live_chat', 'https://studio.youtube.com/live_chat'],
     containerSelector: '#items',
     messageSelector: 'yt-live-chat-text-message-renderer:not([author-type="owner"])',
-    detectUpdateBy: {
-      type: 'attribute',
-      attribute: 'id',
-    },
     fields: [
       { name: 'name', selector: '#author-name' },
       { name: 'body', selector: '#message' },

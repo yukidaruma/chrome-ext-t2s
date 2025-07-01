@@ -25,32 +25,15 @@ const createMonitor = (config: SiteConfig) => () => {
   });
 
   // Start observing updates
-  let containerNode!: Element | null;
+  let containerNode: Element = document.body;
   if (config.containerSelector) {
-    containerNode = document.querySelector(config.containerSelector);
-  }
-  containerNode ??= document.body;
-
-  let lastMessageId: string | null = null;
-  switch (config.detectUpdateBy?.type) {
-    case 'attribute': {
-      const lastElement = containerNode.querySelector(`${config.messageSelector}:last-of-type`);
-      lastMessageId = lastElement?.getAttribute(config.detectUpdateBy.attribute) ?? null;
+    const foundContainer = document.querySelector(config.containerSelector);
+    if (foundContainer) {
+      containerNode = foundContainer;
     }
   }
-  logger.debug(`Initial lastMessageId: ${lastMessageId}`);
 
-  const extractMessageData = (element: Element): { id: string | null; text: string } | null => {
-    let elementId: string | null = null;
-    switch (config.detectUpdateBy?.type) {
-      case 'attribute':
-        elementId = element.getAttribute(config.detectUpdateBy.attribute);
-        if (!elementId) return null;
-        break;
-      default:
-        break;
-    }
-
+  const extractMessageData = (element: Element): string | null => {
     const fieldValues = extractFieldValues(element, config.fields);
     const hasContent = Object.values(fieldValues).some(value => value !== '');
     if (!hasContent) return null;
@@ -69,81 +52,48 @@ const createMonitor = (config: SiteConfig) => () => {
     const outputFilters = cachedFilters.filter(f => f.enabled && f.target === 'output');
     formattedText = applyTextFilters(formattedText, outputFilters, { logger });
 
-    return {
-      id: elementId,
-      // Re-normalize whitespace. formattedText may contain extra spacing from:
-      // - formatText: user-supplied format string with multiple spaces
-      // - applyTextFilters: text replacements
-      text: normalizeWhitespaces(formattedText),
-    };
+    // Re-normalize whitespace. formattedText may contain extra spacing from:
+    // - formatText: user-supplied format string with multiple spaces
+    // - applyTextFilters: text replacements
+    return normalizeWhitespaces(formattedText);
   };
 
-  const scanExistingMessages = (container: Element): void => {
-    container.querySelectorAll(config.messageSelector).forEach(element => {
-      const messageData = extractMessageData(element);
-      if (messageData?.id) {
-        lastMessageId = messageData.id;
-      }
-    });
-  };
+  const messageQueue: string[] = [];
+  let isProcessing = false;
 
-  const findNewMessages = (container: Element): Array<{ id: string | null; text: string }> => {
-    let foundPreviousLastMessage = !lastMessageId;
-    const newMessages: Array<{ id: string | null; text: string }> = [];
-
-    container.querySelectorAll(config.messageSelector).forEach(element => {
-      let elementId: string | null = null;
-      switch (config.detectUpdateBy?.type) {
-        case 'attribute':
-          elementId = element.getAttribute(config.detectUpdateBy.attribute);
-          if (!elementId) return;
-
-          if (elementId === lastMessageId) {
-            foundPreviousLastMessage = true;
-            return;
-          }
-          if (!foundPreviousLastMessage) {
-            return;
-          }
-          break;
-        default:
-          break;
-      }
-
-      const messageData = extractMessageData(element);
-      if (messageData) {
-        newMessages.push(messageData);
-        if (messageData.id) {
-          lastMessageId = messageData.id;
-        }
-      }
-    });
-
-    return newMessages;
-  };
-
-  const queueMessages = async (messages: Array<{ id: string | null; text: string }>) => {
-    const { enabled } = await extensionEnabledStorage.get();
-    if (!enabled) {
-      logger.debug('Extension is disabled, skipping speech');
+  const processQueue = async () => {
+    if (isProcessing || messageQueue.length === 0) {
       return;
     }
 
-    const { uri: storedVoiceURI } = await ttsVoiceEngineStorage.get();
+    isProcessing = true;
 
-    for (const message of messages) {
-      logger.debug(`Added new message to speech queue: ${message.text}`);
+    const { enabled } = await extensionEnabledStorage.get();
+    if (enabled && messageQueue.length > 0) {
+      const { uri: storedVoiceURI } = await ttsVoiceEngineStorage.get();
 
-      await speakText(message.text, storedVoiceURI, logger);
+      while (messageQueue.length > 0) {
+        const message = messageQueue.shift()!;
+        logger.debug(`Speaking queued message: ${message}`);
+        await speakText(message, storedVoiceURI, logger);
+      }
+    } else if (!enabled && messageQueue.length > 0) {
+      logger.debug('Extension is disabled, clearing speech queue');
+      messageQueue.length = 0;
     }
+
+    isProcessing = false;
   };
 
-  // Initial scan for existing messages to set lastMessageId (does not speak them)
-  scanExistingMessages(containerNode);
+  const queueMessage = (message: string) => {
+    logger.debug(`Adding message to queue: ${message}`);
+    messageQueue.push(message);
+    processQueue();
+  };
 
   // Set up MutationObserver to watch for new messages
   const observer = new MutationObserver(mutations => {
-    checkMutations: for (const mutation of mutations) {
+    for (const mutation of mutations) {
       if (mutation.type !== 'childList') {
         continue;
       }
@@ -153,10 +103,13 @@ const createMonitor = (config: SiteConfig) => () => {
         const node = mutation.addedNodes.item(i)!;
         if (node.nodeType === Node.ELEMENT_NODE) {
           const element = node as Element;
-          if (element.matches(config.messageSelector)) {
-            const newMessages = findNewMessages(containerNode);
-            queueMessages(newMessages);
-            break checkMutations;
+          // Check if the element itself matches the message selector;
+          // if not, check if it contains any matching elements
+          if (element.matches(config.messageSelector) || element.querySelector(config.messageSelector)) {
+            const messageText = extractMessageData(element);
+            if (messageText) {
+              queueMessage(messageText);
+            }
           }
         }
       }
