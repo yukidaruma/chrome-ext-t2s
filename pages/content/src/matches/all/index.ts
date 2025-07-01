@@ -102,8 +102,6 @@ const createMonitor = (config: SiteConfig) => async () => {
         continue;
       }
 
-      console.log('Mutation detected:', mutation, mutation.addedNodes.item(0)?.textContent, mutation.addedNodes.length);
-
       // Check if any added nodes match message selector or contain matching elements
       for (let i = 0; i < mutation.addedNodes.length; i++) {
         const node = mutation.addedNodes.item(i)!;
