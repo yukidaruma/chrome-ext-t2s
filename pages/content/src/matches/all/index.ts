@@ -1,43 +1,16 @@
-import { logger, formatText, extractFieldValues, speakText, normalizeWhitespaces } from '@extension/shared/lib/utils';
+import {
+  logger,
+  formatText,
+  extractFieldValues,
+  speakText,
+  normalizeWhitespaces,
+  findSiteConfigByUrl,
+} from '@extension/shared/lib/utils';
 import { applyTextFilters } from '@extension/shared/lib/utils/text-filter';
 import { extensionEnabledStorage, textFilterStorage, ttsVoiceEngineStorage } from '@extension/storage';
-import type { FieldExtractor } from '@extension/shared/lib/utils/text-to-speech';
+import type { SiteConfig } from '@extension/shared/lib/utils/site-config';
 
 logger.log('All content script loaded');
-
-type DetectUpdateByAttribute = {
-  type: 'attribute';
-  attribute: string;
-};
-
-type SiteConfig = {
-  name: string;
-  urlPattern: RegExp;
-  containerSelector?: string;
-  messageSelector: string;
-  detectUpdateBy?: DetectUpdateByAttribute;
-  fields: FieldExtractor[];
-  textFormat: string;
-  pollingInterval?: number;
-};
-
-const siteConfigs: SiteConfig[] = [
-  {
-    name: 'YouTube Live Chat',
-    urlPattern: /^https:\/\/studio\.youtube\.com\/live_chat\?/,
-    containerSelector: '#items',
-    messageSelector: 'yt-live-chat-text-message-renderer:not([author-type="owner"])',
-    detectUpdateBy: {
-      type: 'attribute',
-      attribute: 'id',
-    },
-    fields: [
-      { name: 'name', selector: '#author-name' },
-      { name: 'body', selector: '#message' },
-    ],
-    textFormat: '%(name) %(body)',
-  },
-];
 
 const createMonitor = (config: SiteConfig) => () => {
   logger.debug(`${config.name} monitoring started.`);
@@ -199,13 +172,7 @@ const createMonitor = (config: SiteConfig) => () => {
 
 const main = () => {
   const url = location.href;
-
-  let siteConfig = siteConfigs.find(config => config.urlPattern.test(url));
-
-  // Use YouTube config for test screen
-  if (location.protocol === 'chrome-extension:' && location.href.includes('/chat-test.html')) {
-    siteConfig = siteConfigs[0];
-  }
+  const siteConfig = findSiteConfigByUrl(url);
 
   logger.debug(`Running content script on URL: ${url}`, { enabled: Boolean(siteConfig) });
   if (!siteConfig) {
