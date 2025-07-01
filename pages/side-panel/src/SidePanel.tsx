@@ -113,86 +113,87 @@ const SidePanel = () => {
 
   return (
     <div className={cn('App', isLight ? 'light' : 'dark')}>
-      <ToggleButton
-        checked={isLight}
-        onChange={exampleThemeStorage.toggle}
-        label={isLight ? 'Light Mode' : 'Dark Mode'}
-      />
+      <div className="px-6 pt-6">
+        <div className="mt-2">
+          <ToggleButton
+            checked={consoleLogging}
+            onChange={logConsoleStorage.toggle}
+            label={consoleLogging ? 'Console Logging: On' : 'Console Logging: Off'}
+          />
+        </div>
 
-      <div className="mt-2">
-        <ToggleButton
-          checked={consoleLogging}
-          onChange={logConsoleStorage.toggle}
-          label={consoleLogging ? 'Console Logging: On' : 'Console Logging: Off'}
-        />
-      </div>
+        <div className="mt-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-semibold">Logs:</h3>
+            <div className="ml-4 flex gap-3 space-x-1 text-xs">
+              {(Object.keys(levelColors) as LogEntry['level'][]).map(level => (
+                <label key={level} className="flex cursor-pointer items-center gap-1">
+                  <input
+                    type="checkbox"
+                    checked={enabledLevels[level]}
+                    onChange={() => toggleLevel(level)}
+                    className="rounded"
+                  />
+                  <span className={levelColors[level]}>{level}</span>
+                </label>
+              ))}
+            </div>
 
-      <div className="mt-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Logs:</h3>
-          <div className="ml-4 flex gap-3 space-x-1 text-xs">
-            {(Object.keys(levelColors) as LogEntry['level'][]).map(level => (
-              <label key={level} className="flex cursor-pointer items-center gap-1">
-                <input
-                  type="checkbox"
-                  checked={enabledLevels[level]}
-                  onChange={() => toggleLevel(level)}
-                  className="rounded"
-                />
-                <span className={levelColors[level]}>{level}</span>
-              </label>
-            ))}
+            <div className="flex-1"></div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={copyLogs}
+                className="bg-secondary border-primary rounded border px-2 py-1 text-xs hover:opacity-80">
+                Copy
+              </button>
+              <button
+                onClick={clearLogs}
+                className="bg-secondary border-primary rounded border px-2 py-1 text-xs hover:opacity-80">
+                Clear
+              </button>
+            </div>
           </div>
 
-          <div className="flex-1"></div>
+          <pre className="bg-secondary h-64 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-xs">
+            {filteredLogs.length === 0 ? (
+              <div className="text-secondary">No logs available</div>
+            ) : (
+              filteredLogs.map((log, index) => (
+                <div key={index} className="mb-1 font-mono">
+                  <span className="text-secondary">{formatTimestamp(log.timestamp)}</span>{' '}
+                  <span className={cn('inline-block w-12', levelColors[log.level])}>[{log.level.toUpperCase()}]</span>{' '}
+                  <span className="text-primary">{log.message}</span>
+                  {log.data && (
+                    <div className="text-secondary ml-4 text-xs">
+                      {String(typeof log.data === 'string' ? log.data : JSON.stringify(log.data))}
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </pre>
+        </div>
 
-          <div className="flex gap-2">
+        <div className="mt-4">
+          <div className="mb-2 flex items-center justify-between">
+            <h3 className="text-sm font-semibold">App Storage:</h3>
             <button
-              onClick={copyLogs}
+              onClick={copyStorage}
               className="bg-secondary border-primary rounded border px-2 py-1 text-xs hover:opacity-80">
               Copy
             </button>
-            <button
-              onClick={clearLogs}
-              className="bg-secondary border-primary rounded border px-2 py-1 text-xs hover:opacity-80">
-              Clear
-            </button>
           </div>
+          <pre className="bg-secondary h-64 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-xs">
+            {JSON.stringify(storageData, null, 2)}
+          </pre>
         </div>
-
-        <pre className="bg-secondary h-64 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-xs">
-          {filteredLogs.length === 0 ? (
-            <div className="text-secondary">No logs available</div>
-          ) : (
-            filteredLogs.map((log, index) => (
-              <div key={index} className="mb-1 font-mono">
-                <span className="text-secondary">{formatTimestamp(log.timestamp)}</span>{' '}
-                <span className={cn('inline-block w-12', levelColors[log.level])}>[{log.level.toUpperCase()}]</span>{' '}
-                <span className="text-primary">{log.message}</span>
-                {log.data && (
-                  <div className="text-secondary ml-4 text-xs">
-                    {String(typeof log.data === 'string' ? log.data : JSON.stringify(log.data))}
-                  </div>
-                )}
-              </div>
-            ))
-          )}
-        </pre>
       </div>
 
-      <div className="mt-4">
-        <div className="mb-2 flex items-center justify-between">
-          <h3 className="text-sm font-semibold">App Storage:</h3>
-          <button
-            onClick={copyStorage}
-            className="bg-secondary border-primary rounded border px-2 py-1 text-xs hover:opacity-80">
-            Copy
-          </button>
-        </div>
-        <pre className="bg-secondary h-64 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-xs">
-          {JSON.stringify(storageData, null, 2)}
-        </pre>
-      </div>
+      <iframe
+        className="h-[30rem] w-full p-0 [&::-webkit-scrollbar]:hidden"
+        src="/options/index.html?inline=1"
+        title="Options"></iframe>
     </div>
   );
 };

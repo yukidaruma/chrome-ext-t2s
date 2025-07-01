@@ -24,6 +24,9 @@ const Options = () => {
   const [isTestingVoice, setIsTestingVoice] = useState(false);
   const currentVolumeRef = useRef(storedVolume);
 
+  // Check if we're in inline mode (embedded in iframe)
+  const isInline = new URLSearchParams(window.location.search).has('inline');
+
   const iconColor = getIconColor(isLight);
 
   const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
@@ -176,33 +179,37 @@ const Options = () => {
           </div>
         </div>
 
-        <hr />
+        {!isInline && (
+          <>
+            <hr />
 
-        <div>
-          <h1>{t('contacts')}</h1>
-          <div className="space-x-2">
-            <a
-              href={PROJECT_URL_OBJECT.url}
-              target="_blank"
-              title={t('openPage', t('githubRepository'))}
-              aria-label={t('githubRepository')}>
-              <icons.Github color={iconColor} size="32" />
-            </a>
-            <a
-              href={PROJECT_URL_OBJECT.x}
-              target="_blank"
-              title={t('openPage', t('xProfile'))}
-              aria-label={t('xProfile')}>
-              <icons.X color={iconColor} size="32" />
-            </a>
-          </div>
-        </div>
+            <div>
+              <h1>{t('contacts')}</h1>
+              <div className="space-x-2">
+                <a
+                  href={PROJECT_URL_OBJECT.url}
+                  target="_blank"
+                  title={t('openPage', t('githubRepository'))}
+                  aria-label={t('githubRepository')}>
+                  <icons.Github color={iconColor} size="32" />
+                </a>
+                <a
+                  href={PROJECT_URL_OBJECT.x}
+                  target="_blank"
+                  title={t('openPage', t('xProfile'))}
+                  aria-label={t('xProfile')}>
+                  <icons.X color={iconColor} size="32" />
+                </a>
+              </div>
+            </div>
 
-        <hr />
+            <hr />
 
-        <div>
-          <a href="chat-test.html">{t('openPage', t('testPage'))}</a>
-        </div>
+            <div>
+              <a href="chat-test.html">{t('openPage', t('testPage'))}</a>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
