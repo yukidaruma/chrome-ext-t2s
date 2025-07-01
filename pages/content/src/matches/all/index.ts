@@ -6,6 +6,7 @@ import {
   normalizeWhitespaces,
   findSiteConfigByUrl,
   retryForValue,
+  sleep,
 } from '@extension/shared/lib/utils';
 import { applyTextFilters } from '@extension/shared/lib/utils/text-filter';
 import { extensionEnabledStorage, textFilterStorage, ttsVoiceEngineStorage } from '@extension/storage';
@@ -13,7 +14,8 @@ import type { SiteConfig } from '@extension/shared/lib/utils/site-config';
 
 logger.log('All content script loaded');
 
-const createMonitor = (config: SiteConfig) => async () => {
+type CleanUpFunction = () => void;
+const createMonitor = (config: SiteConfig) => async (): Promise<CleanUpFunction> => {
   logger.debug(`${config.name} monitoring started.`);
 
   // Subscribe to filter changes
@@ -40,16 +42,14 @@ const createMonitor = (config: SiteConfig) => async () => {
 
   // Wait for page to load if loadDetectionSelector is specified
   if (config.loadDetectionSelector) {
-    const loadDetectionElement = await retryForValue(() => containerNode.querySelector(config.loadDetectionSelector!), {
-      // Retry up to 10 seconds
-      retries: 100,
-      baseDelay: 100,
-    });
-    if (!loadDetectionElement) {
-      logger.warn(`Load detection element not found: ${config.loadDetectionSelector}`);
-      return;
-    }
-    logger.debug(`Load detection element found: ${config.loadDetectionSelector}`);
+    const _loadDetectionElement = await retryForValue(
+      () => containerNode.querySelector(config.loadDetectionSelector!),
+      {
+        // Retry forever; since it multiplies in the retry function, it can overflow in unrealistic scenario
+        retries: Number.MAX_SAFE_INTEGER,
+        baseDelay: 100,
+      },
+    );
   }
 
   const extractMessageData = (element: Element): string | null => {
@@ -129,6 +129,41 @@ const createMonitor = (config: SiteConfig) => async () => {
     subtree: !config.containerSelector, // Only observe subtree if no specific container
   });
   logger.debug('MutationObserver started', { containerNode });
+
+  // Return cleanup function
+  return () => {
+    logger.debug(`${config.name} monitoring stopped.`);
+    observer.disconnect();
+  };
+};
+
+let currentCleanup: CleanUpFunction | null = null;
+const setUpMonitorWithUrlWatcher = async (siteConfig: SiteConfig) => {
+  const monitor = createMonitor(siteConfig);
+  currentCleanup = await monitor();
+
+  // Since Twitch.tv overriding history.pushState and history.replaceState,
+  // we need to watch for URL changes using polling
+  let currentUrl = location.href;
+  while (true) {
+    await sleep(1000);
+
+    const newUrl = location.href;
+    if (newUrl !== currentUrl) {
+      logger.log('URL changed detected', { currentUrl, newUrl });
+      currentUrl = newUrl;
+
+      // Clean up previous monitor if it exists
+      if (currentCleanup) {
+        logger.debug('Cleaning up previous monitor');
+        currentCleanup();
+      }
+
+      // Create a new monitor for the new URL
+      currentCleanup = await monitor();
+      logger.debug(`Created new monitor for: ${newUrl}`);
+    }
+  }
 };
 
 const main = () => {
@@ -144,8 +179,17 @@ const main = () => {
 
   speechSynthesis.getVoices(); // Ensure voices are loaded on first speechSynthesis.speak call
 
-  const monitor = createMonitor(siteConfig);
-  monitor();
+  // Check if this is Twitch (SPA that needs URL watching)
+  const isTwitch = siteConfig.id === 'twitch';
+
+  if (isTwitch) {
+    logger.debug('Setting up URL watcher for Twitch SPA navigation');
+    setUpMonitorWithUrlWatcher(siteConfig);
+  } else {
+    // For non-SPA sites, just start monitoring once
+    const monitor = createMonitor(siteConfig);
+    monitor();
+  }
 };
 
 main();

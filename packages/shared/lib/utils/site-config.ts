@@ -1,6 +1,7 @@
 import type { FieldExtractor } from './text-to-speech.js';
 
 export type SiteConfig = {
+  id: string;
   name: string;
   urlPatterns: string[];
   containerSelector?: string;
@@ -13,6 +14,7 @@ export type SiteConfig = {
 
 export const siteConfigs: SiteConfig[] = [
   {
+    id: 'youtube-live',
     name: 'YouTube Live Chat',
     urlPatterns: ['https://www.youtube.com/live_chat', 'https://studio.youtube.com/live_chat'],
     containerSelector: '#items',
@@ -24,6 +26,7 @@ export const siteConfigs: SiteConfig[] = [
     textFormat: '%(name) %(body)',
   },
   {
+    id: 'twitch',
     name: 'Twitch Chat',
     urlPatterns: ['https://www.twitch.tv/'],
     containerSelector: '.chat-scrollable-area__message-container',
