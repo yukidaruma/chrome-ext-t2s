@@ -48,7 +48,7 @@ const manifest = {
   },
   content_scripts: [
     {
-      matches: ['https://*/*', '<all_urls>'],
+      matches: ['https://www.youtube.com/live_chat*', 'https://studio.youtube.com/live_chat*'],
       js: ['content/all.iife.js'],
       all_frames: true,
     },
