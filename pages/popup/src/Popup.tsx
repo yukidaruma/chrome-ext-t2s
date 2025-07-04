@@ -14,7 +14,7 @@ const Popup = () => {
   return (
     <div className={cn('App h-screen w-full', isLight ? 'light' : 'dark')}>
       <header className="App-header flex items-center justify-between">
-        <h1 className="text-xl font-semibold">{t('extensionName')}</h1>
+        <h1 className="text-xl font-semibold">{t('extensionNameShort')}</h1>
         <a href="/options/index.html" target="_blank" title={t('openPage', t('settings'))} aria-label={t('settings')}>
           <icons.Configure color={iconColor} size="24" />
         </a>

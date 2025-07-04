@@ -1,11 +1,15 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "React、TypeScript、Viteを使用したChrome拡張機能のボイラープレートです。"
+    "message": "YouTubeライブ配信のチャットを音声で読み上げる拡張機能です。"
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "chrome-ext-t2s"
+    "message": "Livestream Chat Reader - ライブ配信チャットの読み上げ"
+  },
+  "extensionNameShort": {
+    "description": "Short extension name used in UI",
+    "message": "Livestream Chat Reader"
   },
   "toggleTheme": {
     "message": "テーマ切り替え"

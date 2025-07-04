@@ -1,11 +1,15 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "Chrome extension boilerplate developed with Vite, React and Typescript"
+    "message": "Read YouTube livestream chat messages aloud with text-to-speech."
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "chrome-ext-t2s"
+    "message": "Livestream Chat Reader - Chat Text-to-Speech for Livestreams"
+  },
+  "extensionNameShort": {
+    "description": "Short extension name used in UI",
+    "message": "Livestream Chat Reader"
   },
   "toggleTheme": {
     "message": "Toggle theme"
