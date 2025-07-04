@@ -45,6 +45,10 @@ export type StorageConfigType<D = string> = {
   };
 };
 
+export type ToggleStorageType<T> = BaseStorageType<T> & {
+  toggle: () => Promise<void>;
+};
+
 // extension-enabled-storage.ts
 export type ExtensionEnabledStateType = {
   enabled: boolean;
@@ -91,9 +95,6 @@ export type LogStorageType = BaseStorageType<LogStateType> & {
 export type ThemeStateType = {
   theme: 'light' | 'dark';
   isLight: boolean;
-};
-export type ToggleStorageType<T> = BaseStorageType<T> & {
-  toggle: () => Promise<void>;
 };
 export type ThemeStorageType = ToggleStorageType<ThemeStateType>;
 
