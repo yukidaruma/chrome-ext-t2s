@@ -48,7 +48,7 @@ const manifest = {
   },
   content_scripts: [
     {
-      matches: ['https://*/*', '<all_urls>'],
+      matches: ['https://www.youtube.com/live_chat*', 'https://studio.youtube.com/live_chat*'],
       js: ['content/all.iife.js'],
       all_frames: true,
     },
@@ -56,7 +56,7 @@ const manifest = {
   web_accessible_resources: [
     {
       resources: ['*.js', '*.css', '*.svg', '*.png'],
-      matches: ['*://*/*'],
+      matches: ['https://*.youtube.com/*'], // The exact same pattern with `content_scripts` does not work
     },
   ],
   side_panel: {
