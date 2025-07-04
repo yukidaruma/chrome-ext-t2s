@@ -52,7 +52,7 @@ const processLogTask = async ({ level, args, timestamp }: LogTask) => {
           return;
         }
 
-        writeToConsole(level, text);
+        writeToConsole(level, ...args);
       }),
     ]);
   } catch {
@@ -61,6 +61,7 @@ const processLogTask = async ({ level, args, timestamp }: LogTask) => {
 };
 
 const logMessage = (level: 'debug' | 'info' | 'warn' | 'error', ...args: unknown[]) => {
+  // E2E tests depending on the logs
   if (navigator.webdriver) {
     writeToConsole(level, ...args);
     return;
