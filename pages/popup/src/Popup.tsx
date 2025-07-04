@@ -1,6 +1,6 @@
 import '@src/Popup.css';
 import { t } from '@extension/i18n';
-import { useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
+import { useStorage, useSubscribeIcon, withErrorBoundary, withSuspense } from '@extension/shared';
 import { exampleThemeStorage, extensionEnabledStorage } from '@extension/storage';
 import { cn, ErrorDisplay, getIconColor, icons, LoadingSpinner, ToggleButton } from '@extension/ui';
 
@@ -8,6 +8,8 @@ const Popup = () => {
   const { isLight } = useStorage(exampleThemeStorage);
   const { enabled } = useStorage(extensionEnabledStorage);
   const iconColor = getIconColor(isLight);
+
+  useSubscribeIcon();
 
   return (
     <div className={cn('App h-screen w-full', isLight ? 'light' : 'dark')}>

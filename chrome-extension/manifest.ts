@@ -31,7 +31,7 @@ const manifest = {
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'scripting', 'tabs', 'notifications', 'sidePanel'],
+  permissions: ['storage', 'scripting', 'notifications', 'sidePanel'],
   options_page: 'options/index.html',
   background: {
     service_worker: 'background.js',
@@ -39,10 +39,12 @@ const manifest = {
   },
   action: {
     default_popup: 'popup/index.html',
-    default_icon: 'icon-34.png',
+    default_icon: 'speaker-icon-32.png',
   },
   icons: {
-    '128': 'icon-128.png',
+    '32': 'speaker-icon-32.png',
+    '128': 'speaker-icon-128.png',
+    '512': 'speaker-icon-512.png',
   },
   content_scripts: [
     {
@@ -53,7 +55,7 @@ const manifest = {
   ],
   web_accessible_resources: [
     {
-      resources: ['*.js', '*.css', '*.svg', 'icon-128.png', 'icon-34.png'],
+      resources: ['*.js', '*.css', '*.svg', '*.png'],
       matches: ['*://*/*'],
     },
   ],

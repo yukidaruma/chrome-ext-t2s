@@ -16,7 +16,8 @@
     "lint": "eslint .",
     "lint:fix": "pnpm lint --fix",
     "prettier": "prettier . --write --ignore-path ../.prettierignore",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "convert-icons": "node convert-icons.js"
   },
   "dependencies": {
     "@extension/env": "workspace:*",
@@ -31,6 +32,7 @@
     "@extension/vite-config": "workspace:*",
     "@laynezh/vite-plugin-lib-assets": "^1.1.0",
     "magic-string": "^0.30.17",
+    "sharp": "^0.34.2",
     "ts-loader": "^9.5.2"
   }
 }

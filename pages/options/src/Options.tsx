@@ -1,7 +1,14 @@
 import '@src/Options.css';
 import { t } from '@extension/i18n';
 import { supportedLanguages } from '@extension/i18n/lib/types';
-import { PROJECT_URL_OBJECT, useDebounce, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
+import {
+  PROJECT_URL_OBJECT,
+  useDebounce,
+  useStorage,
+  useSubscribeIcon,
+  withErrorBoundary,
+  withSuspense,
+} from '@extension/shared';
 import { speakText } from '@extension/shared/lib/utils';
 import {
   exampleThemeStorage,
@@ -30,6 +37,8 @@ const Options = () => {
   const isInline = new URLSearchParams(window.location.search).has('inline');
 
   const iconColor = getIconColor(isLight);
+
+  useSubscribeIcon();
 
   const handleLanguageChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
     languageStorage.setLanguage(event.target.value);
