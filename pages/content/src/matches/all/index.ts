@@ -73,7 +73,7 @@ const createMonitor = (config: SiteConfig) => () => {
 
     while (enabled && messageQueue.length > 0) {
       const message = messageQueue.shift()!;
-      logger.debug(`Start speech: ${message}`);
+      logger.debug(`Start speech: "${message}"`);
 
       const { promise, cancel } = speakText(message, storedVoiceURI, { logger });
       const unsubscribe = extensionEnabledStorage.subscribe(() => {
@@ -88,10 +88,17 @@ const createMonitor = (config: SiteConfig) => () => {
         }
       });
 
-      const speechResult = await promise;
-      if (speechResult) {
-        logger.debug(`Finished speech: ${message}`);
+      try {
+        const speechResult = await promise;
+        if (speechResult) {
+          logger.debug(`Finished speech: "${message}"`);
+        }
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          logger.error(`Error during speech: "${message}": ${error.message}`);
+        }
       }
+
       unsubscribe();
     }
 
@@ -99,7 +106,7 @@ const createMonitor = (config: SiteConfig) => () => {
   };
 
   const queueMessage = (message: string) => {
-    logger.debug(`Adding message to queue: ${message}`);
+    logger.debug(`Adding message to queue: "${message}"`);
     messageQueue.push(message);
     processQueue();
   };
