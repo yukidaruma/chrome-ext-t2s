@@ -202,7 +202,7 @@ window.addEventListener('load', function () {
 
 if (!navigator.webdriver) {
   chrome.storage.sync.get('theme-storage-key', function (data) {
-    const theme = data['theme-storage-key'].theme ?? 'light';
+    const theme = data['theme-storage-key']?.theme ?? 'light';
     document.body.classList.add(theme);
   });
 }
