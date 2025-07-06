@@ -206,3 +206,6 @@ if (!navigator.webdriver) {
     document.body.classList.add(theme);
   });
 }
+
+// Expose addMessage function globally for testing
+Object.assign(window, { addMessage });

@@ -5,6 +5,7 @@ import {
   speakText,
   normalizeWhitespaces,
   findSiteConfigByUrl,
+  initWebDriverShim,
 } from '@extension/shared/lib/utils';
 import { applyTextFilters } from '@extension/shared/lib/utils/text-filter';
 import { extensionEnabledStorage, textFilterStorage, ttsVoiceEngineStorage } from '@extension/storage';
@@ -143,9 +144,14 @@ const createMonitor = (config: SiteConfig) => () => {
   logger.debug('MutationObserver started', { containerNode });
 };
 
-const main = () => {
+const main = async () => {
   const url = location.href;
   const siteConfig = findSiteConfigByUrl(url);
+
+  // Initialize shim for E2E testing
+  if (navigator.webdriver) {
+    await initWebDriverShim();
+  }
 
   logger.debug(`Running content script on URL: ${url}`, { enabled: Boolean(siteConfig) });
   if (!siteConfig) {

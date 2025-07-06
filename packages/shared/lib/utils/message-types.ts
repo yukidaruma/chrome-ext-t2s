@@ -34,8 +34,14 @@ export type TTSSpeakResponse = {
   };
 };
 
+// This request does not have corresponding response
+export type SetWebDriverShimRequest = {
+  type: 'SET_WEBDRIVER_SHIM_REQUEST';
+  data?: BackgroundRequestDataPlaceholder;
+};
+
 // Union type for all background messages
-export type BackgroundRequest = TTSSpeakRequest | TTSCancelRequest;
+export type BackgroundRequest = TTSSpeakRequest | TTSCancelRequest | SetWebDriverShimRequest;
 export type BackgroundRequestType = BackgroundRequest['type'];
 export type TTSResponse = TTSSpeakResponse | TTSCancelResponse;
 export type TTSResponseType = TTSResponse['type'];
@@ -44,6 +50,7 @@ export type TTSResponseType = TTSResponse['type'];
 export type BackgroundRequestResponseMap = {
   TTS_SPEAK_REQUEST: TTSSpeakResponse;
   TTS_CANCEL_REQUEST: TTSCancelResponse;
+  SET_WEBDRIVER_SHIM_REQUEST: void;
 };
 
 // Utility type to infer Response type from Request type

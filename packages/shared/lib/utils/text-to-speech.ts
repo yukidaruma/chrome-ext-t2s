@@ -129,3 +129,9 @@ export const speakText = (
 
   return { promise, cancel };
 };
+
+export const initWebDriverShim = async () => {
+  await sendTTSMessage({
+    type: 'SET_WEBDRIVER_SHIM_REQUEST',
+  });
+};
