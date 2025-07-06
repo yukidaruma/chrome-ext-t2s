@@ -20,6 +20,7 @@ export const withPageConfig = (config: UserConfig) =>
       {
         define: {
           'process.env': env,
+          'navigator.webdriver': IS_DEV ? undefined : 'false',
         },
         base: '',
         plugins: [react(), IS_DEV && watchRebuildPlugin({ refresh: true }), nodePolyfills()],

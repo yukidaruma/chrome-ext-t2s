@@ -14,6 +14,7 @@ const outDir = resolve(rootDir, '..', 'dist');
 export default defineConfig({
   define: {
     'process.env': env,
+    'navigator.webdriver': IS_DEV ? undefined : 'false',
   },
   resolve: {
     alias: {
