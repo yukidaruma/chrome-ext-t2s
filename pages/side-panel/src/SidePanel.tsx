@@ -1,9 +1,12 @@
 import '@src/SidePanel.css';
+import { t } from '@extension/i18n';
 import { logger, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
 import { exampleThemeStorage, logConsoleStorage, logStorage } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
 import { useEffect, useState } from 'react';
 import type { LogEntry } from '@extension/storage/lib/base/types';
+
+const manifestJson = chrome.runtime.getManifest();
 
 const SidePanel = () => {
   const { isLight } = useStorage(exampleThemeStorage);
@@ -114,16 +117,46 @@ const SidePanel = () => {
   return (
     <div className={cn('App', isLight ? 'light' : 'dark')}>
       <div className="px-6 pt-6">
-        <div className="mt-2">
+        <div className="warning">
+          <div className="flex items-center">
+            <div className="ml-3">
+              <h3>{t('debugPanel')}</h3>
+              <div className="text">
+                <p>{t('debugPanelDescription')}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Technical Information */}
+        <div className="mt-4 space-y-2">
+          <h3 className="text-sm font-semibold">
+            <a href="/manifest.json">Extension Information (manifest.json)</a>
+          </h3>
+          <div className="bg-secondary space-y-1 rounded p-3 font-mono text-xs">
+            <div>
+              <span className="text-secondary">Name:</span> <span className="text-primary">{manifestJson.name}</span>
+            </div>
+            <div>
+              <span className="text-secondary">Version:</span>{' '}
+              <span className="text-primary">{manifestJson.version}</span>
+            </div>
+            <div>
+              <span className="text-secondary">Extension ID:</span>{' '}
+              <span className="text-primary">{chrome.runtime.id}</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-4">
           <ToggleButton
             checked={consoleLogging}
             onChange={logConsoleStorage.toggle}
             label={consoleLogging ? 'Console Logging: On' : 'Console Logging: Off'}
           />
         </div>
-
-        <div className="mt-4">
-          <div className="mb-2 flex items-center justify-between">
+        <div className="mt-2">
+          <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold">Logs:</h3>
             <div className="ml-4 flex gap-3 space-x-1 text-xs">
               {(Object.keys(levelColors) as LogEntry['level'][]).map(level => (
@@ -155,12 +188,12 @@ const SidePanel = () => {
             </div>
           </div>
 
-          <pre className="bg-secondary h-64 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-xs">
+          <pre className="bg-secondary mt-2 h-64 space-y-1 overflow-auto whitespace-pre-wrap break-words rounded p-2 text-xs">
             {filteredLogs.length === 0 ? (
               <div className="text-secondary">No logs available</div>
             ) : (
               filteredLogs.map((log, index) => (
-                <div key={index} className="mb-1 font-mono">
+                <div key={index} className="font-mono">
                   <span className="text-secondary">{formatTimestamp(log.timestamp)}</span>{' '}
                   <span className={cn('inline-block w-12', levelColors[log.level])}>[{log.level.toUpperCase()}]</span>{' '}
                   <span className="text-primary">{log.message}</span>
@@ -176,7 +209,7 @@ const SidePanel = () => {
         </div>
 
         <div className="mt-4">
-          <div className="mb-2 flex items-center justify-between">
+          <div className="flex items-center justify-between space-y-2">
             <h3 className="text-sm font-semibold">App Storage:</h3>
             <button
               onClick={copyStorage}

@@ -91,5 +91,11 @@
   },
   "displayErrorReset": {
     "message": "再度実行する"
+  },
+  "debugPanel": {
+    "message": "デバッグパネル"
+  },
+  "debugPanelDescription": {
+    "message": "このパネルは開発者および専門的な知識を持つユーザー向けのものです。"
   }
 }

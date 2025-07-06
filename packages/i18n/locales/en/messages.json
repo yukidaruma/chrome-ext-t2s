@@ -91,5 +91,11 @@
   },
   "displayErrorReset": {
     "message": "Run Again"
+  },
+  "debugPanel": {
+    "message": "Debug Panel"
+  },
+  "debugPanelDescription": {
+    "message": "This panel is intended for developers and advanced users only."
   }
 }
