@@ -1,11 +1,20 @@
 import 'webextension-polyfill';
 import { logger } from '@extension/shared/lib/utils';
-import type { TTSRequest, TTSSpeakRequest, TTSCancelRequest, TTSResponse } from '@extension/shared/lib/utils';
+import type {
+  BackgroundRequest,
+  TTSSpeakRequest,
+  TTSCancelRequest,
+  InferBackgroundResponse,
+} from '@extension/shared/lib/utils';
 
-type SendResponseFunction = (response: TTSResponse) => void;
+type SendResponseFunction<T extends BackgroundRequest> = (response: InferBackgroundResponse<T>) => void;
+type BackgroundRequestHandler<T extends BackgroundRequest> = (
+  request: T,
+  sendResponse: SendResponseFunction<T>,
+) => void | Promise<void>;
 
 // TTS functionality using chrome.tts.speak()
-const handleTTSSpeak = async (request: TTSSpeakRequest, sendResponse: SendResponseFunction) => {
+const handleTTSSpeak: BackgroundRequestHandler<TTSSpeakRequest> = async (request, sendResponse) => {
   const { text, voiceURI, volume, requestId } = request.data;
 
   try {
@@ -24,7 +33,7 @@ const handleTTSSpeak = async (request: TTSSpeakRequest, sendResponse: SendRespon
         ) {
           // Send response back to content script
           sendResponse({
-            type: 'TTS_RESPONSE',
+            type: 'TTS_SPEAK_RESPONSE',
             data: {
               requestId,
               type: event.type,
@@ -43,7 +52,7 @@ const handleTTSSpeak = async (request: TTSSpeakRequest, sendResponse: SendRespon
   } catch (error) {
     logger.error(`TTS error for request ${requestId}:`, error);
     sendResponse({
-      type: 'TTS_RESPONSE',
+      type: 'TTS_SPEAK_RESPONSE',
       data: {
         requestId,
         type: 'error',
@@ -54,7 +63,7 @@ const handleTTSSpeak = async (request: TTSSpeakRequest, sendResponse: SendRespon
   }
 };
 
-const handleTTSCancel = (_request: TTSCancelRequest, sendResponse: SendResponseFunction) => {
+const handleTTSCancel: BackgroundRequestHandler<TTSCancelRequest> = (_request, sendResponse) => {
   chrome.tts.stop();
   logger.debug('Cancelled all TTS requests');
 
@@ -67,23 +76,25 @@ const handleTTSCancel = (_request: TTSCancelRequest, sendResponse: SendResponseF
 };
 
 // Message listener for TTS commands
-chrome.runtime.onMessage.addListener((message: TTSRequest, _sender, sendResponse: SendResponseFunction) => {
-  // See: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
+chrome.runtime.onMessage.addListener(
+  (message: BackgroundRequest, _sender, sendResponse: SendResponseFunction<BackgroundRequest>) => {
+    // See: https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/runtime/onMessage#sending_an_asynchronous_response_using_sendresponse
 
-  logger.debug('Background received message:', message.type, message.data);
+    logger.debug('Background received message:', message.type, message.data);
 
-  switch (message.type) {
-    case 'TTS_SPEAK':
-      handleTTSSpeak(message, sendResponse);
-      return true;
+    switch (message.type) {
+      case 'TTS_SPEAK_REQUEST':
+        handleTTSSpeak(message, sendResponse);
+        return true;
 
-    case 'TTS_CANCEL':
-      handleTTSCancel(message, sendResponse);
-      return true;
+      case 'TTS_CANCEL_REQUEST':
+        handleTTSCancel(message, sendResponse);
+        return true;
 
-    default:
-      return false;
-  }
-});
+      default:
+        return false;
+    }
+  },
+);
 
 console.log('Background script loaded.');

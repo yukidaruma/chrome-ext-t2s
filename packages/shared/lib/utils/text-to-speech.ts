@@ -2,7 +2,7 @@
 
 import { ttsVolumeStorage } from '@extension/storage';
 import type { logger as loggerType } from './logger.js';
-import type { TTSRequest, TTSSpeakRequest, InferTTSResponse } from './message-types.js';
+import type { BackgroundRequest, TTSSpeakRequest, InferBackgroundResponse } from './message-types.js';
 
 export type FieldExtractor = {
   name: string;
@@ -43,8 +43,8 @@ export const normalizeWhitespaces = (text: string): string => text.replace(/\s+/
 const generateRequestId = (): string => `${Date.now()}_${Math.random().toString(36).substring(2, 6)}`;
 
 // Helper function to send TTS messages to background script via chrome.runtime.sendMessage
-const sendTTSMessage = <T extends TTSRequest>(message: T): Promise<InferTTSResponse<T>> =>
-  chrome.runtime.sendMessage<T, InferTTSResponse<T>>(message);
+export const sendTTSMessage = <T extends BackgroundRequest>(message: T): Promise<InferBackgroundResponse<T>> =>
+  chrome.runtime.sendMessage<T, InferBackgroundResponse<T>>(message);
 
 export type CancellableSpeech = {
   promise: Promise<boolean>; // Resolves to true if speech completed successfully, false if cancelled
@@ -82,7 +82,7 @@ export const speakText = (
 
     // Send TTS request to background script
     sendTTSMessage({
-      type: 'TTS_SPEAK',
+      type: 'TTS_SPEAK_REQUEST',
       data: speakRequestData,
     })
       .then(response => {
@@ -117,7 +117,7 @@ export const speakText = (
         // Send cancel message to background script
         // Note: Since we don't queue multiple messages at once, cancelling all TTS requests effectively cancels this single request
         await sendTTSMessage({
-          type: 'TTS_CANCEL',
+          type: 'TTS_CANCEL_REQUEST',
         });
       } catch (error) {
         logger?.error(`Error cancelling TTS request ${requestId}:`, error);
