@@ -23,6 +23,17 @@ const handleTTSSpeak: BackgroundRequestHandler<TTSSpeakRequest> = async (request
       voiceName: voiceURI ?? undefined,
       volume,
       onEvent: (event: chrome.tts.TtsEvent) => {
+        // Filter out verbose TTS events
+        if (
+          event.type === 'word' ||
+          event.type === 'sentence' ||
+          event.type === 'marker' ||
+          event.type === 'pause' ||
+          event.type === 'resume'
+        ) {
+          return;
+        }
+
         logger.debug(`TTS Event for ${requestId}:`, event.type);
 
         if (
