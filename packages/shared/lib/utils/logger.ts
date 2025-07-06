@@ -2,6 +2,7 @@ import { logConsoleStorage, logStorage } from '@extension/storage';
 import type { LogEntry } from '@extension/storage/lib/base/types.js';
 
 type LogTask = {
+  prefix: string;
   level: LogEntry['level'];
   args: unknown[];
   timestamp: number;
@@ -24,35 +25,35 @@ const processLogQueue = async () => {
   isProcessing = false;
 };
 
-const writeToConsole = (level: LogEntry['level'], ...args: unknown[]) => {
+const writeToConsole = (prefix: string, level: LogEntry['level'], ...args: unknown[]) => {
   switch (level) {
     case 'error':
-      console.error('[TTS]', ...args);
+      console.error(prefix, ...args);
       break;
     case 'warn':
-      console.warn('[TTS]', ...args);
+      console.warn(prefix, ...args);
       break;
     case 'info':
-      console.log('[TTS]', ...args);
+      console.log(prefix, ...args);
       break;
     case 'debug':
-      console.debug('[TTS]', ...args);
+      console.debug(prefix, ...args);
       break;
   }
 };
 
-const processLogTask = async ({ level, args, timestamp }: LogTask) => {
+const processLogTask = async ({ prefix, level, args, timestamp }: LogTask) => {
   const text = formatMessage(...args);
 
   try {
     await Promise.allSettled([
-      logStorage.addEntry(level, text, undefined, timestamp),
+      logStorage.addEntry(level, `${prefix} ${text}`, undefined, timestamp),
       logConsoleStorage.get().then(({ enabled }) => {
         if (!enabled) {
           return;
         }
 
-        writeToConsole(level, ...args);
+        writeToConsole(prefix, level, ...args);
       }),
     ]);
   } catch {
@@ -60,14 +61,33 @@ const processLogTask = async ({ level, args, timestamp }: LogTask) => {
   }
 };
 
+const getExecutionContext = (): string => {
+  if (typeof window === 'undefined') {
+    if (typeof chrome !== 'undefined' && chrome.runtime) {
+      return 'BG';
+    }
+  } else {
+    if (typeof chrome !== 'undefined' && window.location?.protocol === 'chrome-extension:') {
+      return 'EXT';
+    }
+    if (window.location) {
+      return window.location.hostname;
+    }
+  }
+
+  return 'UNKNOWN';
+};
+
+const context = getExecutionContext();
+const prefix = `[${context}]`;
 const logMessage = (level: 'debug' | 'info' | 'warn' | 'error', ...args: unknown[]) => {
   // E2E tests depending on the logs
   if (navigator.webdriver) {
-    writeToConsole(level, ...args);
+    writeToConsole(prefix, level, ...args);
     return;
   }
 
-  logQueue.push({ level, args, timestamp: Date.now() });
+  logQueue.push({ prefix, level, args, timestamp: Date.now() });
   processLogQueue();
 };
 
