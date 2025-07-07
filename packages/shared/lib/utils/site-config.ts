@@ -15,7 +15,7 @@ export const siteConfigs: SiteConfig[] = [
     name: 'YouTube Live Chat',
     urlPatterns: ['https://www.youtube.com/live_chat', 'https://studio.youtube.com/live_chat'],
     containerSelector: '#items',
-    messageSelector: 'yt-live-chat-text-message-renderer:not([author-type="owner"])',
+    messageSelector: 'yt-live-chat-text-message-renderer',
     fields: [
       { name: 'name', selector: '#author-name' },
       { name: 'body', selector: '#message' },
