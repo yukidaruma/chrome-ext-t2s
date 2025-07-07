@@ -1,7 +1,17 @@
+import { IS_DEV } from '@extension/env';
 import { readFileSync } from 'node:fs';
 import type { ManifestType } from '@extension/shared';
 
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
+
+const permissions: ManifestType['permissions'] = [
+  'storage',
+  'scripting',
+  'tts', // This permission is required for using TTS without user interaction
+];
+if (IS_DEV) {
+  permissions.push('sidePanel');
+}
 
 /**
  * @prop default_locale
@@ -31,13 +41,7 @@ const manifest = {
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
   host_permissions: ['<all_urls>'],
-  permissions: [
-    'storage',
-    'scripting',
-    'notifications',
-    'sidePanel',
-    'tts', // This permission is required for using TTS without user interaction
-  ],
+  permissions,
   options_page: 'options/index.html',
   background: {
     service_worker: 'background.js',
@@ -62,7 +66,7 @@ const manifest = {
   web_accessible_resources: [
     {
       resources: ['*.js', '*.css', '*.svg', '*.png'],
-      matches: ['https://*.youtube.com/*'], // The exact same pattern with `content_scripts` does not work
+      matches: ['https://www.youtube.com/*', 'https://studio.youtube.com/*'], // The exact same pattern with `content_scripts` does not work
     },
   ],
   side_panel: {
