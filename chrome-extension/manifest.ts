@@ -4,12 +4,14 @@ import type { ManifestType } from '@extension/shared';
 
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
 
+let sidePanel: ManifestType['side_panel'] | undefined;
 const permissions: ManifestType['permissions'] = [
   'storage',
-  'scripting',
   'tts', // This permission is required for using TTS without user interaction
 ];
 if (IS_DEV) {
+  // Remove sidepanel from production build.
+  // This does not remove actual script from the bundle.
   permissions.push('sidePanel');
 }
 
@@ -40,7 +42,7 @@ const manifest = {
   // },
   version: packageJson.version,
   description: '__MSG_extensionDescription__',
-  host_permissions: ['<all_urls>'],
+  host_permissions: ['https://www.youtube.com/live_chat*', 'https://studio.youtube.com/live_chat*'],
   permissions,
   options_page: 'options/index.html',
   background: {
@@ -69,9 +71,7 @@ const manifest = {
       matches: ['https://www.youtube.com/*', 'https://studio.youtube.com/*'], // The exact same pattern with `content_scripts` does not work
     },
   ],
-  side_panel: {
-    default_path: 'side-panel/index.html',
-  },
+  sidePanel,
 } satisfies ManifestType;
 
 export default manifest;
